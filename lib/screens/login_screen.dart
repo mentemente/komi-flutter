@@ -117,14 +117,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Text(
+                      'KOMI',
+                      style: AppTextStyles.h1.copyWith(color: AppColors.white),
+                    ),
                     Image.network(
                       AppAssets.loginImage,
                       width: 256,
                       height: 256,
-                    ),
-                    Text(
-                      'KOMI',
-                      style: AppTextStyles.h1.copyWith(color: AppColors.white),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -164,13 +164,13 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Image.network(AppAssets.loginImage, width: 128, height: 128),
-          const SizedBox(height: 12),
           const Text(
             'KOMI',
             style: AppTextStyles.h1,
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 12),
+          Image.network(AppAssets.loginImage, width: 128, height: 128),
           const SizedBox(height: 8),
           const Text(
             'Inicia sesión con tu número de teléfono',
