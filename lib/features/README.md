@@ -50,12 +50,12 @@ lib/features/
 
 ## Features actuales
 
-| Feature   | Ruta(s)      | Descripción              |
-|----------|---------------|---------------------------|
-| `auth/login`   | `/login`      | Inicio de sesión          |
-| `auth/register`| `/registro`   | Registro de usuario       |
-| `home`         | `/`           | Pantalla principal        |
-| `404`          | (not found)   | Página de error 404       |
+| Feature         | Ruta(s)     | Descripción         |
+| --------------- | ----------- | ------------------- |
+| `auth/login`    | `/login`    | Inicio de sesión    |
+| `auth/register` | `/registro` | Registro de usuario |
+| `home`          | `/`         | Pantalla principal  |
+| `404`           | (not found) | Página de error 404 |
 
 Las rutas se definen en `lib/config/routes.dart` y los handlers en `lib/config/route_handlers.dart`. Los nombres de rutas están en `lib/core/constants/route_names.dart`.
 
@@ -65,13 +65,13 @@ Las rutas se definen en `lib/config/routes.dart` y los handlers en `lib/config/r
 
 Cada submódulo (ej. `login`, `register`) suele tener:
 
-| Elemento        | Rol |
-|-----------------|-----|
-| **Page**        | Pantalla: layout (Scaffold, AppBar) y composición de widgets. |
-| **Controller**  | Lógica: validaciones, llamadas al service, estado de la UI. |
-| **State**       | (Opcional) Modelo del estado: loading, error, datos. |
-| **Service**     | Comunicación con backend/API; sin UI. |
-| **widgets/**    | Widgets reutilizables solo dentro de ese submódulo. |
+| Elemento       | Rol                                                           |
+| -------------- | ------------------------------------------------------------- |
+| **Page**       | Pantalla: layout (Scaffold, AppBar) y composición de widgets. |
+| **Controller** | Lógica: validaciones, llamadas al service, estado de la UI.   |
+| **State**      | (Opcional) Modelo del estado: loading, error, datos.          |
+| **Service**    | Comunicación con backend/API; sin UI.                         |
+| **widgets/**   | Widgets reutilizables solo dentro de ese submódulo.           |
 
 Flujo típico: **Page** → usa **Controller** → Controller usa **Service** y actualiza **State** → Page reacciona al estado.
 

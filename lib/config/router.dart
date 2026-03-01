@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
-import 'package:komi_fe/core/widgets/vendor_bottom_nav.dart';
+import 'package:komi_fe/core/widgets/seller_bottom_nav.dart';
 import 'package:komi_fe/features/404/not_found_page.dart';
 import 'package:komi_fe/features/auth/login/login_page.dart';
 import 'package:komi_fe/features/auth/register/register_page.dart';
 import 'package:komi_fe/features/home/home_page.dart';
-import 'package:komi_fe/features/vendor/daily_menu/daily_menu_page.dart';
-import 'package:komi_fe/features/vendor/dishes/dishes_page.dart';
-import 'package:komi_fe/features/vendor/orders/orders_page.dart';
-import 'package:komi_fe/features/vendor/overview/overview_page.dart';
-import 'package:komi_fe/features/vendor/profile/profile_page.dart';
+import 'package:komi_fe/features/seller/creation/creation_page.dart';
+import 'package:komi_fe/features/seller/daily_menu/daily_menu_page.dart';
+import 'package:komi_fe/features/seller/dishes/dishes_page.dart';
+import 'package:komi_fe/features/seller/orders/orders_page.dart';
+import 'package:komi_fe/features/seller/overview/overview_page.dart';
+import 'package:komi_fe/features/seller/profile/profile_page.dart';
 
 final goRouter = _createRouter();
 
@@ -39,11 +40,16 @@ GoRouter _createRouter() {
             _page(key: state.pageKey, child: const RegisterPage()),
       ),
       GoRoute(
-        path: RouteNames.vendor,
+        path: RouteNames.creation,
+        pageBuilder: (context, state) =>
+            _page(key: state.pageKey, child: const CreationPage()),
+      ),
+      GoRoute(
+        path: RouteNames.seller,
         redirect: (context, state) {
           final p = state.uri.path;
-          if (p == RouteNames.vendor || p == '${RouteNames.vendor}/') {
-            return '${RouteNames.vendor}${RouteNames.overview}';
+          if (p == RouteNames.seller || p == '${RouteNames.seller}/') {
+            return '${RouteNames.seller}${RouteNames.overview}';
           }
           return null;
         },
@@ -52,11 +58,11 @@ GoRouter _createRouter() {
             builder: (context, state, child) {
               final location = state.uri.path;
               const tabs = [
-                '${RouteNames.vendor}${RouteNames.orders}',
-                '${RouteNames.vendor}${RouteNames.dailyMenu}',
-                '${RouteNames.vendor}${RouteNames.overview}',
-                '${RouteNames.vendor}${RouteNames.dishes}',
-                '${RouteNames.vendor}${RouteNames.profile}',
+                '${RouteNames.seller}${RouteNames.orders}',
+                '${RouteNames.seller}${RouteNames.dailyMenu}',
+                '${RouteNames.seller}${RouteNames.overview}',
+                '${RouteNames.seller}${RouteNames.dishes}',
+                '${RouteNames.seller}${RouteNames.profile}',
               ];
               final currentIndex = tabs.indexWhere(
                 (t) => location.startsWith(t),
@@ -64,7 +70,7 @@ GoRouter _createRouter() {
 
               return Scaffold(
                 body: child,
-                bottomNavigationBar: VendorBottomNav(
+                bottomNavigationBar: SellerBottomNav(
                   currentIndex: currentIndex,
                   tabs: tabs,
                 ),

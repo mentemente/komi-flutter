@@ -1,6 +1,6 @@
 enum UserType {
   buyer,
-  vendor;
+  seller;
 
   static UserType fromString(String value) {
     return UserType.values.firstWhere(

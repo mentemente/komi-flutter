@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class VendorBottomNav extends StatelessWidget {
-  const VendorBottomNav({
+class SellerBottomNav extends StatelessWidget {
+  const SellerBottomNav({
     super.key,
     required this.currentIndex,
     required this.tabs,
@@ -65,20 +65,19 @@ class VendorBottomNav extends StatelessWidget {
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                          style: (selected
-                                  ? labelStyle
-                                  : unselectedLabelStyle)
-                              ?.copyWith(
-                                color: selected
-                                    ? selectedColor
-                                    : unselectedColor,
-                                fontSize: 12,
-                              ),
+                            style:
+                                (selected ? labelStyle : unselectedLabelStyle)
+                                    ?.copyWith(
+                                      color: selected
+                                          ? selectedColor
+                                          : unselectedColor,
+                                      fontSize: 12,
+                                    ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
                 ),
               );
             }),
