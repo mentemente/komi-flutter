@@ -5,9 +5,10 @@ abstract final class RouteNames {
   static const String home = '/inicio';
   static const String login = '/login';
   static const String register = '/registro';
+  static const String creation = '/creacion';
 
-  // Vendor routes
-  static const String vendor = '/vendedor';
+  // Seller routes
+  static const String seller = '/vendedor';
   static const String orders = '/ordenes';
   static const String dailyMenu = '/carta-del-dia';
   static const String overview = '/resumen';

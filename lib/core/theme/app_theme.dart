@@ -18,19 +18,25 @@ abstract final class AppTheme {
       foregroundColor: AppColors.textDark,
       elevation: 0,
     ),
-    textTheme: const TextTheme(
+    textTheme: TextTheme(
       headlineLarge: AppTextStyles.h1,
       headlineMedium: AppTextStyles.h2,
       headlineSmall: AppTextStyles.h3,
+      titleLarge: AppTextStyles.h4,
+      titleMedium: AppTextStyles.h5,
+      titleSmall: AppTextStyles.h6,
       bodyLarge: AppTextStyles.body,
-      bodyMedium: AppTextStyles.caption,
+      bodyMedium: AppTextStyles.bodySmall,
+      bodySmall: AppTextStyles.caption,
+      labelLarge: AppTextStyles.button,
+      labelMedium: AppTextStyles.subtitle2,
       labelSmall: AppTextStyles.small,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: AppTextStyles.button,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
@@ -38,7 +44,7 @@ abstract final class AppTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
         side: const BorderSide(color: AppColors.primary),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: AppTextStyles.button,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),

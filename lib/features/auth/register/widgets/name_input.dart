@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:komi_fe/core/constants/app_colors.dart';
 
-class PhoneInput extends StatelessWidget {
-  const PhoneInput({
+class NameInput extends StatelessWidget {
+  const NameInput({
     super.key,
     required this.controller,
     this.validator,
@@ -17,19 +16,18 @@ class PhoneInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      keyboardType: TextInputType.phone,
+      textCapitalization: TextCapitalization.words,
       style: const TextStyle(color: AppColors.textDark, fontSize: 16),
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       decoration: const InputDecoration(
-        labelText: 'Número de teléfono',
-        prefixIcon: Icon(Icons.phone),
+        labelText: 'Nombre',
+        prefixIcon: Icon(Icons.person),
       ),
       validator: validator ??
           (value) {
-            if (value == null || value.isEmpty) {
-              return 'Ingresa tu número de teléfono';
+            if (value == null || value.isEmpty) return 'Ingresa tu nombre';
+            if (value.length < 3) {
+              return 'El nombre debe tener al menos 3 caracteres';
             }
-            if (value.length < 7) return 'Número de teléfono inválido';
             return null;
           },
     );
