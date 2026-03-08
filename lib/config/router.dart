@@ -6,6 +6,7 @@ import 'package:komi_fe/features/404/not_found_page.dart';
 import 'package:komi_fe/features/auth/login/login_page.dart';
 import 'package:komi_fe/features/auth/register/register_page.dart';
 import 'package:komi_fe/features/home/home_page.dart';
+import 'package:komi_fe/features/buyer/location/location_permission_page.dart';
 import 'package:komi_fe/features/seller/creation/creation_page.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_page.dart';
 import 'package:komi_fe/features/seller/dishes/dishes_page.dart';
@@ -43,6 +44,11 @@ GoRouter _createRouter() {
         path: RouteNames.creation,
         pageBuilder: (context, state) =>
             _page(key: state.pageKey, child: const CreationPage()),
+      ),
+      GoRoute(
+        path: RouteNames.locationPermission,
+        pageBuilder: (context, state) =>
+            _page(key: state.pageKey, child: const LocationPermissionPage()),
       ),
       GoRoute(
         path: RouteNames.seller,
