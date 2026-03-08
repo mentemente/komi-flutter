@@ -5,15 +5,19 @@ class LocationPermissionIllustration extends StatelessWidget {
   const LocationPermissionIllustration({
     super.key,
     required this.state,
+    this.showDenyButton = true,
   });
 
   final LocationPermissionState state;
+  final bool showDenyButton;
 
   @override
   Widget build(BuildContext context) {
-    final isInitial = state is LocationPermissionInitial ||
-        state is LocationPermissionLoading;
-    final asset = isInitial
+    final isWaiting =
+        (state is LocationPermissionInitial ||
+            state is LocationPermissionLoading) &&
+        showDenyButton;
+    final asset = isWaiting
         ? 'assets/images/ollin_esperando.webp'
         : 'assets/images/ollin_ubicacion.webp';
 
@@ -23,7 +27,7 @@ class LocationPermissionIllustration extends StatelessWidget {
           FadeTransition(opacity: animation, child: child),
       child: Image.asset(
         asset,
-        key: ValueKey(state.runtimeType),
+        key: ValueKey('$showDenyButton-${state.runtimeType}'),
         height: 140,
         fit: BoxFit.contain,
       ),

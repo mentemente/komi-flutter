@@ -67,15 +67,13 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _onStateChanged() {
+    if (!mounted) return;
+    setState(() {});
     final state = _controller.state.value;
     if (state is RegisterSuccess) {
       _controller.reset();
       if (!mounted) return;
-      if (state.response.type == UserType.seller) {
-        context.go('${RouteNames.seller}${RouteNames.overview}');
-      } else {
-        context.go(RouteNames.home);
-      }
+      context.go(RouteNames.creation);
     } else if (state is RegisterError) {
       _controller.reset();
       if (!mounted) return;

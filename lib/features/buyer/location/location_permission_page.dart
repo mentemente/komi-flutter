@@ -20,6 +20,7 @@ class LocationPermissionPage extends StatefulWidget {
 
 class _LocationPermissionPageState extends State<LocationPermissionPage> {
   late final LocationPermissionController _controller;
+  bool _showDenyButton = true;
 
   @override
   void initState() {
@@ -67,7 +68,10 @@ class _LocationPermissionPageState extends State<LocationPermissionPage> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          LocationPermissionIllustration(state: state),
+                          LocationPermissionIllustration(
+                            state: state,
+                            showDenyButton: _showDenyButton,
+                          ),
                           const SizedBox(height: 24),
                           LocationPermissionMessage(state: state),
                         ],
@@ -78,7 +82,9 @@ class _LocationPermissionPageState extends State<LocationPermissionPage> {
                 LocationPermissionActions(
                   state: state,
                   onGrantPermission: _controller.requestPermission,
-                  onDenyPermission: _controller.denyPermission,
+                  onDenyPermission: () =>
+                      setState(() => _showDenyButton = false),
+                  showDenyButton: _showDenyButton,
                 ),
               ],
             ),

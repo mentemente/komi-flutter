@@ -12,11 +12,10 @@ class SellerBottomNav extends StatelessWidget {
   final List<String> tabs;
 
   static const List<_NavItem> _items = [
-    _NavItem(icon: Icons.assignment, label: 'Ordenes activas'),
-    _NavItem(icon: Icons.restaurant_menu, label: 'Carta del día'),
     _NavItem(icon: Icons.star_outline, label: '¿Cómo va el día?'),
     _NavItem(icon: Icons.description, label: 'Mis platos'),
-    _NavItem(icon: Icons.store, label: 'Mi tienda'),
+    _NavItem(icon: Icons.assignment, label: 'Ordenes activas'),
+    _NavItem(icon: Icons.restaurant_menu, label: 'Carta del día'),
   ];
 
   @override
@@ -33,24 +32,30 @@ class SellerBottomNav extends StatelessWidget {
     final unselectedLabelStyle =
         navTheme.unselectedLabelStyle ?? theme.textTheme.labelSmall;
 
+    const topRadius = BorderRadius.only(
+      topLeft: Radius.circular(16),
+      topRight: Radius.circular(16),
+    );
+
     return Material(
       color: navTheme.backgroundColor ?? theme.colorScheme.surface,
-      child: SafeArea(
-        child: SizedBox(
-          height: 80,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(_items.length, (index) {
-              final item = _items[index];
-              final selected = (currentIndex < 0 ? 0 : currentIndex) == index;
-              return Expanded(
-                child: InkWell(
-                  onTap: () => context.go(tabs[index]),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: topRadius),
+      child: ClipRRect(
+        borderRadius: topRadius,
+        child: SafeArea(
+          child: SizedBox(
+            height: 80,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(_items.length, (index) {
+                final item = _items[index];
+                final selected = (currentIndex < 0 ? 0 : currentIndex) == index;
+                return Expanded(
+                  child: InkWell(
+                    onTap: () => context.go(tabs[index]),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
                       children: [
                         Icon(
                           item.icon,
@@ -78,9 +83,9 @@ class SellerBottomNav extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
       ),

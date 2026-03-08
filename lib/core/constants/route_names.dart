@@ -8,11 +8,13 @@ abstract final class RouteNames {
   static const String creation = '/creacion';
   static const String locationPermission = '/ubicacion';
 
+  // Buyer routes
+  static const String restaurants = '/restaurantes';
+
   // Seller routes
   static const String seller = '/vendedor';
   static const String orders = '/ordenes';
   static const String dailyMenu = '/carta-del-dia';
   static const String overview = '/resumen';
   static const String dishes = '/mis-platos';
-  static const String profile = '/mi-tienda';
 }
