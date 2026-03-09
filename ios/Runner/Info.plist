@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>KOMI usa tu ubicación para mostrarte opciones de almuerzo cercanas.</string>
 </dict>
 </plist>

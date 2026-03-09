@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
@@ -10,7 +11,19 @@ import 'package:komi_fe/features/home/widgets/home_content.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  void _onSearch(String query) {}
+  Future<void> _onSearch(BuildContext context, String query) async {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final permission = await Geolocator.checkPermission();
+    final hasPermission = serviceEnabled &&
+        (permission == LocationPermission.whileInUse ||
+            permission == LocationPermission.always);
+    if (!context.mounted) return;
+    if (hasPermission) {
+      context.go(RouteNames.restaurants);
+    } else {
+      context.go(RouteNames.locationPermission);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +72,7 @@ class HomePage extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
           child: HomeContent(
-            onSearch: _onSearch,
+            onSearch: (query) => _onSearch(context, query),
             onRegisterPressed: () => context.go(RouteNames.register),
           ),
         ),
@@ -78,7 +91,7 @@ class HomePage extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: HomeContent(
-                  onSearch: _onSearch,
+                  onSearch: (query) => _onSearch(context, query),
                   onRegisterPressed: () => context.go(RouteNames.register),
                 ),
               ),

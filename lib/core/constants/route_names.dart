@@ -6,6 +6,7 @@ abstract final class RouteNames {
   static const String login = '/login';
   static const String register = '/registro';
   static const String creation = '/creacion';
+  static const String locationPermission = '/ubicacion';
 
   // Seller routes
   static const String seller = '/vendedor';
