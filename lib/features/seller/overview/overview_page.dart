@@ -3,11 +3,37 @@ import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
+import 'package:komi_fe/core/widgets/menu_item_card.dart';
+import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 import 'widgets/overview_orders_section.dart';
 import 'widgets/overview_stats_bar.dart';
 
 class OverviewPage extends StatelessWidget {
   const OverviewPage({super.key});
+
+  // TODO: change this to get the items from the API
+  static final List<DailyMenuItem> _menuPreviewItems = [
+    DailyMenuItem(
+      name: 'Tequeños',
+      stock: 20,
+      isActive: true,
+      type: MenuItemType.entrada,
+    ),
+    DailyMenuItem(
+      name: 'Arroz con pollo',
+      price: 12,
+      stock: 15,
+      isActive: true,
+      type: MenuItemType.platoSegundo,
+    ),
+    DailyMenuItem(
+      name: 'Lomo saltado',
+      price: 17,
+      stock: 8,
+      isActive: true,
+      type: MenuItemType.platoALaCarta,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +55,14 @@ class OverviewPage extends StatelessWidget {
                 title: 'Menú /Carta',
                 onTap: () =>
                     context.go('${RouteNames.seller}${RouteNames.dailyMenu}'),
+              ),
+              const SizedBox(height: 12),
+              ..._menuPreviewItems.map(
+                (item) => MenuItemCard(
+                  item: item,
+                  onActiveChanged: (_) {},
+                  onSave: (_, _, _, _) {},
+                ),
               ),
               const SizedBox(height: 24),
             ],

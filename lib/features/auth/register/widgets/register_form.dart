@@ -81,6 +81,18 @@ class RegisterForm extends StatelessWidget {
                 controller: passwordController,
                 obscureText: obscurePassword,
                 onToggleObscure: onToggleObscure,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Ingresa tu contraseña';
+                  }
+                  if (value.contains(' ')) {
+                    return 'La contraseña no puede contener espacios';
+                  }
+                  if (value.length < 9) {
+                    return 'La contraseña debe tener al menos 9 caracteres';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 16),
               UserTypeSelector(value: userType, onChanged: onUserTypeChanged),

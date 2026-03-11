@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 
@@ -9,6 +10,13 @@ const List<String> _suggestions = [
   'Tallarines verdes',
   'Papa a la huancaina',
 ];
+
+const int _minLength = 3;
+const int _maxLength = 50;
+
+final _lettersAndSpacesFormatter = FilteringTextInputFormatter.allow(
+  RegExp(r'[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]'),
+);
 
 class HomeSearchSection extends StatefulWidget {
   const HomeSearchSection({super.key, this.onSearch});
@@ -22,6 +30,12 @@ class HomeSearchSection extends StatefulWidget {
 class _HomeSearchSectionState extends State<HomeSearchSection> {
   late final TextEditingController _controller;
   String? _selectedSuggestion;
+  String? _errorText;
+
+  bool get _canSearch {
+    final text = _controller.text.trim();
+    return text.isNotEmpty && text.length >= _minLength;
+  }
 
   @override
   void initState() {
@@ -40,12 +54,20 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
   void _onTextChanged() {
     final text = _controller.text.trim();
     if (_selectedSuggestion != null && text != _selectedSuggestion) {
-      setState(() => _selectedSuggestion = null);
+      _selectedSuggestion = null;
+    }
+    if (_errorText != null) {
+      setState(() => _errorText = null);
+    } else {
+      setState(() {});
     }
   }
 
   void _onSuggestionTap(String text) {
-    setState(() => _selectedSuggestion = text);
+    setState(() {
+      _selectedSuggestion = text;
+      _errorText = null;
+    });
     _controller.text = text;
     _controller.selection = TextSelection(
       baseOffset: 0,
@@ -54,8 +76,21 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
   }
 
   void _onSearchPressed() {
-    final query = _controller.text.trim();
-    widget.onSearch?.call(query);
+    final text = _controller.text.trim();
+
+    if (text.isEmpty) {
+      setState(() => _errorText = 'Ingresa un término para buscar');
+      return;
+    }
+    if (text.length < _minLength) {
+      setState(
+        () => _errorText = 'Escribe al menos $_minLength letras para buscar',
+      );
+      return;
+    }
+
+    setState(() => _errorText = null);
+    widget.onSearch?.call(text);
   }
 
   @override
@@ -66,9 +101,17 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
       children: [
         TextField(
           controller: _controller,
-          decoration: const InputDecoration(
+          inputFormatters: [
+            _lettersAndSpacesFormatter,
+            LengthLimitingTextInputFormatter(_maxLength),
+          ],
+          decoration: InputDecoration(
             hintText: 'Buscar',
-            prefixIcon: Icon(Icons.search),
+            prefixIcon: const Icon(Icons.search),
+            errorText: _errorText,
+            counterText: _controller.text.isNotEmpty
+                ? '${_controller.text.length}/$_maxLength'
+                : null,
           ),
           style: AppTextStyles.body,
           onSubmitted: (_) => _onSearchPressed(),
@@ -92,7 +135,7 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
         SizedBox(
           height: 48,
           child: FilledButton(
-            onPressed: _onSearchPressed,
+            onPressed: _canSearch ? _onSearchPressed : null,
             child: const Text('Buscar'),
           ),
         ),

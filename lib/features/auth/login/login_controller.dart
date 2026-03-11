@@ -14,7 +14,7 @@ class LoginController {
   );
 
   bool validate(String phone, String password) {
-    return phone.length >= 7 && password.length >= 6;
+    return phone.length == 9 && password.length >= 9;
   }
 
   Future<void> submit(String phone, String password) async {

@@ -66,12 +66,29 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void _onStateChanged() {
+  Future<void> _onStateChanged() async {
     if (!mounted) return;
     setState(() {});
     final state = _controller.state.value;
     if (state is RegisterSuccess) {
       _controller.reset();
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          title: const Text('¡Cuenta creada!'),
+          content: const Text(
+            'Tu cuenta fue creada exitosamente. Ya puedes empezar a usar Komi.',
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Continuar'),
+            ),
+          ],
+        ),
+      );
       if (!mounted) return;
       context.go(RouteNames.creation);
     } else if (state is RegisterError) {

@@ -14,7 +14,6 @@ class HomeGuestCta extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text('¿Aun no tienes una cuenta?', style: AppTextStyles.subtitle1),
-        const SizedBox(height: 8),
         TextButton(
           style: TextButton.styleFrom(
             textStyle: AppTextStyles.caption,

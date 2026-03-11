@@ -57,9 +57,12 @@ class _LoginPageState extends State<LoginPage> {
 
   void _onStateChanged() {
     final state = _controller.state.value;
+    if (!mounted) return;
+
+    setState(() {});
+
     if (state is LoginSuccess) {
       _controller.reset();
-      if (!mounted) return;
       if (state.response.type == UserType.seller) {
         context.go('${RouteNames.seller}${RouteNames.overview}');
       } else {
@@ -67,7 +70,6 @@ class _LoginPageState extends State<LoginPage> {
       }
     } else if (state is LoginError) {
       _controller.reset();
-      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(state.message)));
