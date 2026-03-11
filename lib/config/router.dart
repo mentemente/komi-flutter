@@ -5,6 +5,7 @@ import 'package:komi_fe/core/widgets/seller_bottom_nav.dart';
 import 'package:komi_fe/features/404/not_found_page.dart';
 import 'package:komi_fe/features/auth/login/login_page.dart';
 import 'package:komi_fe/features/auth/register/register_page.dart';
+import 'package:komi_fe/features/buyer/restaurants/restaurants_page.dart';
 import 'package:komi_fe/features/home/home_page.dart';
 import 'package:komi_fe/features/buyer/location/location_permission_page.dart';
 import 'package:komi_fe/features/seller/creation/creation_page.dart';
@@ -12,7 +13,6 @@ import 'package:komi_fe/features/seller/daily_menu/daily_menu_page.dart';
 import 'package:komi_fe/features/seller/dishes/dishes_page.dart';
 import 'package:komi_fe/features/seller/orders/orders_page.dart';
 import 'package:komi_fe/features/seller/overview/overview_page.dart';
-import 'package:komi_fe/features/seller/profile/profile_page.dart';
 
 final goRouter = _createRouter();
 
@@ -51,6 +51,11 @@ GoRouter _createRouter() {
             _page(key: state.pageKey, child: const LocationPermissionPage()),
       ),
       GoRoute(
+        path: RouteNames.restaurants,
+        pageBuilder: (context, state) =>
+            _page(key: state.pageKey, child: const RestaurantsPage()),
+      ),
+      GoRoute(
         path: RouteNames.seller,
         redirect: (context, state) {
           final p = state.uri.path;
@@ -64,11 +69,10 @@ GoRouter _createRouter() {
             builder: (context, state, child) {
               final location = state.uri.path;
               const tabs = [
-                '${RouteNames.seller}${RouteNames.orders}',
-                '${RouteNames.seller}${RouteNames.dailyMenu}',
                 '${RouteNames.seller}${RouteNames.overview}',
                 '${RouteNames.seller}${RouteNames.dishes}',
-                '${RouteNames.seller}${RouteNames.profile}',
+                '${RouteNames.seller}${RouteNames.orders}',
+                '${RouteNames.seller}${RouteNames.dailyMenu}',
               ];
               final currentIndex = tabs.indexWhere(
                 (t) => location.startsWith(t),
@@ -102,11 +106,6 @@ GoRouter _createRouter() {
                 path: RouteNames.dishes,
                 pageBuilder: (context, state) =>
                     _page(key: state.pageKey, child: const DishesPage()),
-              ),
-              GoRoute(
-                path: RouteNames.profile,
-                pageBuilder: (context, state) =>
-                    _page(key: state.pageKey, child: const ProfilePage()),
               ),
             ],
           ),

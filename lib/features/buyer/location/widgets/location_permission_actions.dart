@@ -9,16 +9,16 @@ class LocationPermissionActions extends StatelessWidget {
     required this.state,
     required this.onGrantPermission,
     required this.onDenyPermission,
+    this.showDenyButton = true,
   });
 
   final LocationPermissionState state;
   final VoidCallback onGrantPermission;
   final VoidCallback onDenyPermission;
+  final bool showDenyButton;
 
   bool get _showDenyButton =>
-      state is LocationPermissionInitial ||
-      state is LocationPermissionDenied ||
-      state is LocationPermissionError;
+      showDenyButton && state is LocationPermissionInitial;
 
   bool get _isLoading => state is LocationPermissionLoading;
 

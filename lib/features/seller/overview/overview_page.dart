@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'widgets/overview_orders_section.dart';
 import 'widgets/overview_stats_bar.dart';
@@ -23,7 +25,11 @@ class OverviewPage extends StatelessWidget {
               const SizedBox(height: 28),
               const OverviewOrdersSection(),
               const SizedBox(height: 8),
-              _SectionHeader(title: 'Menú /Carta', onTap: () {}),
+              _SectionHeader(
+                title: 'Menú /Carta',
+                onTap: () =>
+                    context.go('${RouteNames.seller}${RouteNames.dailyMenu}'),
+              ),
               const SizedBox(height: 24),
             ],
           ),
