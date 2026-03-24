@@ -19,7 +19,10 @@ class RegisterController {
     required String phone,
     required String password,
   }) {
-    return name.length >= 3 && phone.length >= 7 && password.length >= 6;
+    return name.trim().length >= 4 &&
+        phone.length == 9 &&
+        password.length >= 8 &&
+        !password.contains(' ');
   }
 
   Future<void> submit({

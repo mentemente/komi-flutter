@@ -4,11 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 
 class PhoneInput extends StatelessWidget {
-  const PhoneInput({
-    super.key,
-    required this.controller,
-    this.validator,
-  });
+  const PhoneInput({super.key, required this.controller, this.validator});
 
   final TextEditingController controller;
   final String? Function(String?)? validator;
@@ -24,12 +20,13 @@ class PhoneInput extends StatelessWidget {
         labelText: 'Número de teléfono',
         prefixIcon: Icon(Icons.phone),
       ),
-      validator: validator ??
+      validator:
+          validator ??
           (value) {
             if (value == null || value.isEmpty) {
               return 'Ingresa tu número de teléfono';
             }
-            if (value.length < 7) return 'Número de teléfono inválido';
+            if (value.length != 9) return 'El número debe tener 9 dígitos';
             return null;
           },
     );

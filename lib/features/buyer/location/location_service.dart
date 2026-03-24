@@ -22,6 +22,12 @@ class LocationService {
     final position = await Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
     );
+    if (kDebugMode) {
+      debugPrint('[LocationService] latitud: ${position.latitude}');
+      debugPrint('[LocationService] longitud: ${position.longitude}');
+      debugPrint('[LocationService] altitud (m): ${position.altitude}');
+      debugPrint('[LocationService] precisión horizontal (m): ${position.accuracy}');
+    }
     return position;
   }
 }

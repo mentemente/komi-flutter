@@ -30,14 +30,13 @@ class PasswordInput extends StatelessWidget {
           onPressed: onToggleObscure,
         ),
       ),
-      validator:
-          validator ??
+      validator: validator ??
           (value) {
             if (value == null || value.isEmpty) {
               return 'Ingresa tu contraseña';
             }
-            if (value.length < 6) {
-              return 'La contraseña debe tener al menos 6 caracteres';
+            if (value.length < 9) {
+              return 'La contraseña debe tener al menos 9 caracteres';
             }
             return null;
           },
