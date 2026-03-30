@@ -3,10 +3,7 @@ import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/widgets/logo.dart';
 
 class LocationPermissionHeader extends StatelessWidget {
-  const LocationPermissionHeader({
-    super.key,
-    required this.onBack,
-  });
+  const LocationPermissionHeader({super.key, required this.onBack});
 
   final VoidCallback onBack;
 
@@ -27,7 +24,6 @@ class LocationPermissionHeader extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 16),
           const Expanded(child: Logo(fontSize: 36)),
         ],
       ),

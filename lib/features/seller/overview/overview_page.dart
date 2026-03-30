@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/widgets/menu_item_card.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 import 'widgets/overview_orders_section.dart';
 import 'widgets/overview_stats_bar.dart';
 
-class OverviewPage extends StatelessWidget {
+class OverviewPage extends ConsumerWidget {
   const OverviewPage({super.key});
 
   // TODO: change this to get the items from the API
@@ -36,7 +38,12 @@ class OverviewPage extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final storeName = ref.watch(authSessionProvider)?.stores.first.name;
+    final menuTitle = (storeName != null && storeName.isNotEmpty)
+        ? storeName
+        : 'Menú';
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -45,7 +52,7 @@ class OverviewPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Menú Luisa', style: AppTextStyles.h2),
+              Text(menuTitle, style: AppTextStyles.h2),
               const SizedBox(height: 16),
               const OverviewStatsBar(),
               const SizedBox(height: 28),

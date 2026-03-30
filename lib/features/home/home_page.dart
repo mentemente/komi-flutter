@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
@@ -7,14 +8,16 @@ import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/widgets/komi_brand_panel.dart';
 import 'package:komi_fe/core/widgets/responsive_layout.dart';
 import 'package:komi_fe/features/home/widgets/home_content.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   Future<void> _onSearch(BuildContext context, String query) async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     final permission = await Geolocator.checkPermission();
-    final hasPermission = serviceEnabled &&
+    final hasPermission =
+        serviceEnabled &&
         (permission == LocationPermission.whileInUse ||
             permission == LocationPermission.always);
     if (!context.mounted) return;
@@ -26,7 +29,9 @@ class HomePage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isGuest = ref.watch(authSessionProvider) == null;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -34,38 +39,39 @@ class HomePage extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             ResponsiveLayout(
-              mobile: _buildMobileLayout(context),
-              desktop: _buildDesktopLayout(context),
+              mobile: _buildMobileLayout(context, isGuest),
+              desktop: _buildDesktopLayout(context, isGuest),
             ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: () => context.go(RouteNames.login),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: AppTextStyles.caption,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+            if (isGuest)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () => context.go(RouteNames.login),
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: AppTextStyles.caption,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                       ),
+                      onPressed: () => context.go(RouteNames.login),
+                      child: const Text('Iniciar sesión'),
                     ),
-                    onPressed: () => context.go(RouteNames.login),
-                    child: const Text('Iniciar sesión'),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildMobileLayout(BuildContext context, bool isGuest) {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -74,13 +80,14 @@ class HomePage extends StatelessWidget {
           child: HomeContent(
             onSearch: (query) => _onSearch(context, query),
             onRegisterPressed: () => context.go(RouteNames.register),
+            showGuestCta: isGuest,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildDesktopLayout(BuildContext context) {
+  Widget _buildDesktopLayout(BuildContext context, bool isGuest) {
     return Row(
       children: [
         Expanded(child: KomiBrandPanel()),
@@ -93,6 +100,7 @@ class HomePage extends StatelessWidget {
                 child: HomeContent(
                   onSearch: (query) => _onSearch(context, query),
                   onRegisterPressed: () => context.go(RouteNames.register),
+                  showGuestCta: isGuest,
                 ),
               ),
             ),

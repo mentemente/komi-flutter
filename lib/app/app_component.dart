@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/theme/app_theme.dart';
 
-import '../config/router.dart';
-
 class AppComponent extends StatelessWidget {
-  const AppComponent({super.key});
+  const AppComponent({super.key, required this.router});
+
+  final GoRouter router;
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +13,7 @@ class AppComponent extends StatelessWidget {
       title: 'Komi',
       theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
-      routerConfig: goRouter,
+      routerConfig: router,
     );
   }
 }
