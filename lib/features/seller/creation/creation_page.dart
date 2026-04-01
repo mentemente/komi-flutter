@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
+import 'package:komi_fe/core/network/api_exception.dart';
+import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/widgets/komi_brand_panel.dart';
 import 'package:komi_fe/core/widgets/responsive_layout.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 import 'package:komi_fe/features/seller/creation/widgets/creation_step_one_form.dart';
 import 'package:komi_fe/features/seller/creation/widgets/creation_step_two_form.dart';
 import 'package:komi_fe/features/seller/creation/widgets/delivery_options_section.dart';
@@ -39,6 +45,18 @@ class _CreationPageState extends State<CreationPage> {
   final Set<DeliveryOption> _deliveryOptions = {};
   final _deliveryCostController = TextEditingController();
   final Set<PaymentMethod> _paymentMethods = {};
+  String? _paymentQrUrl;
+  bool _isSubmitting = false;
+
+  static const _apiDayKeys = <String>[
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
+  ];
 
   @override
   void initState() {
@@ -101,6 +119,9 @@ class _CreationPageState extends State<CreationPage> {
     setState(() {
       if (_paymentMethods.contains(method)) {
         _paymentMethods.remove(method);
+        if (method == PaymentMethod.yapePlin) {
+          _paymentQrUrl = null;
+        }
       } else {
         _paymentMethods.add(method);
       }
@@ -116,51 +137,103 @@ class _CreationPageState extends State<CreationPage> {
       final value = double.tryParse(cost.replaceFirst(',', '.'));
       if (value == null || value < 0) return false;
     }
+    if (_paymentMethods.contains(PaymentMethod.yapePlin)) {
+      final qr = _paymentQrUrl?.trim();
+      if (qr == null || qr.isEmpty) return false;
+    }
     return true;
   }
 
-  String _formatTime(TimeOfDay t) {
-    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+  String _timeToApi(TimeOfDay t) {
+    final h = t.hour.toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
-    final period = t.period == DayPeriod.am ? 'am' : 'pm';
-    return '$h:$m$period';
+    return '$h:$m';
   }
 
-  void _onCreate() {
-    if (!_isStepTwoValid()) return;
+  List<Map<String, dynamic>> _schedulesPayload() {
+    if (_scheduleMode == ScheduleMode.allDays) {
+      return List.generate(7, (i) {
+        return <String, dynamic>{
+          'day': _apiDayKeys[i],
+          'open': _timeToApi(_allDaysOpen),
+          'close': _timeToApi(_allDaysClose),
+        };
+      });
+    }
+    final list = <Map<String, dynamic>>[];
+    for (var i = 0; i < 7; i++) {
+      if (!_enabledDays[i]) continue;
+      list.add(<String, dynamic>{
+        'day': _apiDayKeys[i],
+        'open': _timeToApi(_dayOpenTimes[i]),
+        'close': _timeToApi(_dayCloseTimes[i]),
+      });
+    }
+    return list;
+  }
 
-    final dayLabels = [
-      'Lunes',
-      'Martes',
-      'Miércoles',
-      'Jueves',
-      'Viernes',
-      'Sábado',
-      'Domingo',
-    ];
+  Future<void> _onCreate() async {
+    if (!_isStepTwoValid() || _isSubmitting) return;
 
-    final schedule = _scheduleMode == ScheduleMode.allDays
-        ? {
-            'modo': 'Todos los días',
-            'Lunes – Domingo':
-                '${_formatTime(_allDaysOpen)} – ${_formatTime(_allDaysClose)}',
-          }
-        : {
-            'modo': 'Personalizado',
-            'días': Map.fromIterables(
-              dayLabels,
-              List.generate(
-                7,
-                (i) => _enabledDays[i]
-                    ? '${_formatTime(_dayOpenTimes[i])} – ${_formatTime(_dayCloseTimes[i])}'
-                    : 'Cerrado',
-              ),
-            ),
-          };
+    setState(() => _isSubmitting = true);
+    try {
+      final name = _nameController.text.trim();
+      final description = _descriptionController.text.trim().isEmpty
+          ? 'Tienda de comida'
+          : _descriptionController.text.trim();
+      final imageUrl = (_paymentQrUrl != null && _paymentQrUrl!.isNotEmpty)
+          ? _paymentQrUrl!
+          : 'https://example.com/logo.png';
 
-    final deliveryCost = _deliveryOptions.contains(DeliveryOption.delivery)
-        ? _deliveryCostController.text.trim()
-        : null;
+      final pickup = _deliveryOptions.contains(DeliveryOption.pickup);
+      final delivery = _deliveryOptions.contains(DeliveryOption.delivery);
+      final costStr = _deliveryCostController.text.trim().replaceFirst(
+        ',',
+        '.',
+      );
+      final deliveryCost = delivery ? (double.tryParse(costStr) ?? 0) : 0.0;
+
+      final storeData = await ServiceLocator.storeService.createStore(
+        name: name,
+        description: description,
+        imageUrl: imageUrl,
+        schedules: _schedulesPayload(),
+        pickupEnabled: pickup,
+        deliveryEnabled: delivery,
+        deliveryCost: deliveryCost,
+        payments: {
+          'cashOnDelivery': _paymentMethods.contains(PaymentMethod.cash),
+          'prepaid': _paymentMethods.contains(PaymentMethod.yapePlin),
+        },
+      );
+
+      if (!mounted) return;
+
+      await ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(authSessionProvider.notifier).addStoreFromApiData(storeData);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tienda creada correctamente')),
+      );
+
+      if (!mounted) return;
+      context.go('${RouteNames.seller}${RouteNames.overview}');
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.displayMessage)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al crear la tienda: $e')));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -255,9 +328,16 @@ class _CreationPageState extends State<CreationPage> {
       deliveryCostController: _deliveryCostController,
       selectedPaymentMethods: _paymentMethods,
       onPaymentMethodToggled: _togglePaymentMethod,
+      onPaymentQrUrlChanged: (url) => setState(() => _paymentQrUrl = url),
+      paymentQrRequiredMessage:
+          _paymentMethods.contains(PaymentMethod.yapePlin) &&
+              (_paymentQrUrl == null || _paymentQrUrl!.trim().isEmpty)
+          ? 'Debes subir el código QR de Yape o Plin para crear la tienda.'
+          : null,
       onBack: _goBackToStepOne,
       onCreate: _onCreate,
       isCreateEnabled: _isStepTwoValid(),
+      isSubmitting: _isSubmitting,
     );
   }
 }

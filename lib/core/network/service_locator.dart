@@ -1,6 +1,8 @@
 import 'package:komi_fe/core/network/http_client.dart';
+import 'package:komi_fe/core/network/upload_service.dart';
 import 'package:komi_fe/features/auth/login/login_service.dart';
 import 'package:komi_fe/features/auth/register/register_service.dart';
+import 'package:komi_fe/features/seller/creation/store_service.dart';
 
 abstract final class ServiceLocator {
   ServiceLocator._();
@@ -11,4 +13,6 @@ abstract final class ServiceLocator {
 
   static final loginService = LoginService(httpClient);
   static final registerService = RegisterService(httpClient);
+  static final uploadService = UploadService(httpClient);
+  static final storeService = StoreService(httpClient);
 }
