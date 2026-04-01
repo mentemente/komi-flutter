@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/widgets/seller_bottom_nav.dart';
@@ -12,13 +13,36 @@ import 'package:komi_fe/features/seller/creation/creation_page.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_page.dart';
 import 'package:komi_fe/features/seller/dishes/dishes_page.dart';
 import 'package:komi_fe/features/seller/orders/orders_page.dart';
+import 'package:komi_fe/features/auth/models/user_type.dart';
 import 'package:komi_fe/features/seller/overview/overview_page.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
-final goRouter = _createRouter();
+String? _sellerBranchRedirect(
+  GoRouterState state,
+  ProviderContainer container,
+) {
+  final session = container.read(authSessionProvider);
+  if (session == null || session.token.trim().isEmpty) {
+    return RouteNames.login;
+  }
+  if (session.type != UserType.seller) {
+    return RouteNames.home;
+  }
+  if (session.stores.isEmpty) {
+    return RouteNames.creation;
+  }
 
-GoRouter _createRouter() {
+  final p = state.uri.path;
+  if (p == RouteNames.seller || p == '${RouteNames.seller}/') {
+    return '${RouteNames.seller}${RouteNames.overview}';
+  }
+  return null;
+}
+
+GoRouter createGoRouter(ProviderContainer container) {
   return GoRouter(
     initialLocation: RouteNames.home,
+    refreshListenable: authSessionRouterRefresh,
     routes: [
       GoRoute(
         path: RouteNames.root,
@@ -58,11 +82,7 @@ GoRouter _createRouter() {
       GoRoute(
         path: RouteNames.seller,
         redirect: (context, state) {
-          final p = state.uri.path;
-          if (p == RouteNames.seller || p == '${RouteNames.seller}/') {
-            return '${RouteNames.seller}${RouteNames.overview}';
-          }
-          return null;
+          return _sellerBranchRedirect(state, container);
         },
         routes: [
           ShellRoute(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/widgets/komi_brand_panel.dart';
@@ -7,16 +8,18 @@ import 'package:komi_fe/core/widgets/responsive_layout.dart';
 import 'package:komi_fe/features/auth/login/login_controller.dart';
 import 'package:komi_fe/features/auth/login/login_state.dart';
 import 'package:komi_fe/features/auth/login/widgets/login_form.dart';
+import 'package:komi_fe/features/auth/models/auth_response.dart';
 import 'package:komi_fe/features/auth/models/user_type.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -62,18 +65,31 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {});
 
     if (state is LoginSuccess) {
-      _controller.reset();
-      if (state.response.type == UserType.seller) {
-        context.go('${RouteNames.seller}${RouteNames.overview}');
-      } else {
-        context.go(RouteNames.home);
-      }
+      _persistSessionAndNavigate(state.response);
     } else if (state is LoginError) {
       _controller.reset();
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(state.message)));
     }
+  }
+
+  Future<void> _persistSessionAndNavigate(AuthResponse response) async {
+    await ref.read(authSessionProvider.notifier).signIn(response);
+    if (!mounted) return;
+    _controller.reset();
+    setState(() {});
+    context.go(_loginDestination(response));
+  }
+
+  static String _loginDestination(AuthResponse response) {
+    if (response.type == UserType.buyer) {
+      return RouteNames.home;
+    }
+    if (response.stores.isEmpty) {
+      return RouteNames.creation;
+    }
+    return '${RouteNames.seller}${RouteNames.overview}';
   }
 
   void _submit() {

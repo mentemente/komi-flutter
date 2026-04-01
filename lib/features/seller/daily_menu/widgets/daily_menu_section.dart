@@ -15,8 +15,8 @@ class DailyMenuSection extends StatelessWidget {
   final String title;
   final List<DailyMenuItem> items;
   final void Function(DailyMenuItem item, bool value) onActiveChanged;
-  final void Function(
-      DailyMenuItem item, String name, double? price, int stock) onSave;
+  final void Function(DailyMenuItem item, String name, double? price, int stock)
+  onSave;
 
   @override
   Widget build(BuildContext context) {

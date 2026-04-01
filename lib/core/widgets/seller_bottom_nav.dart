@@ -12,9 +12,9 @@ class SellerBottomNav extends StatelessWidget {
   final List<String> tabs;
 
   static const List<_NavItem> _items = [
-    _NavItem(icon: Icons.star_outline, label: '¿Cómo va el día?'),
+    _NavItem(icon: Icons.star_outline, label: '¿Cómo va?'),
     _NavItem(icon: Icons.description, label: 'Mis platos'),
-    _NavItem(icon: Icons.assignment, label: 'Ordenes activas'),
+    _NavItem(icon: Icons.assignment, label: 'Ordenes'),
     _NavItem(icon: Icons.restaurant_menu, label: 'Carta del día'),
   ];
 

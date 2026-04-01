@@ -14,7 +14,7 @@ class MenuItemCard extends StatelessWidget {
   final DailyMenuItem item;
   final ValueChanged<bool> onActiveChanged;
   final void Function(DailyMenuItem item, String name, double? price, int stock)
-      onSave;
+  onSave;
 
   Color get _borderColor => item.type.cardColor;
 
@@ -39,19 +39,23 @@ class MenuItemCard extends StatelessWidget {
         border: Border.all(color: _borderColor, width: 2),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.end,
+                Row(
                   children: [
-                    Text(
-                      item.name,
-                      style: AppTextStyles.subtitle2.copyWith(
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.subtitle2.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     if (item.price != null) ...[
@@ -69,6 +73,8 @@ class MenuItemCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Stock: ${item.stock}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.small.copyWith(
                     color: AppColors.textDark,
                   ),
@@ -90,7 +96,9 @@ class MenuItemCard extends StatelessWidget {
             activeThumbColor: AppColors.white,
             inactiveTrackColor: AppColors.textGray.withValues(alpha: 0.35),
             inactiveThumbColor: AppColors.white,
-            trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((
+              states,
+            ) {
               return states.contains(WidgetState.selected)
                   ? null
                   : Colors.transparent;
@@ -103,10 +111,7 @@ class MenuItemCard extends StatelessWidget {
 }
 
 class _EditMenuItemModal extends StatefulWidget {
-  const _EditMenuItemModal({
-    required this.item,
-    required this.onSave,
-  });
+  const _EditMenuItemModal({required this.item, required this.onSave});
 
   final DailyMenuItem item;
   final void Function(String name, double? price, int stock) onSave;
@@ -151,6 +156,14 @@ class _EditMenuItemModalState extends State<_EditMenuItemModal> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              widget.item.name,
+              style: AppTextStyles.subtitle1.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _stockController,
               keyboardType: TextInputType.number,

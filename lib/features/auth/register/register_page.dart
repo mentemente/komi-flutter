@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/widgets/komi_brand_panel.dart';
 import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/widgets/responsive_layout.dart';
+import 'package:komi_fe/features/auth/models/auth_response.dart';
 import 'package:komi_fe/features/auth/models/user_type.dart';
 import 'package:komi_fe/features/auth/register/register_controller.dart';
 import 'package:komi_fe/features/auth/register/register_state.dart';
 import 'package:komi_fe/features/auth/register/widgets/register_form.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -66,38 +69,33 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future<void> _onStateChanged() async {
+  void _onStateChanged() {
     if (!mounted) return;
     setState(() {});
     final state = _controller.state.value;
     if (state is RegisterSuccess) {
-      _controller.reset();
-      if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => AlertDialog(
-          title: const Text('¡Cuenta creada!'),
-          content: const Text(
-            'Tu cuenta fue creada exitosamente. Ya puedes empezar a usar Komi.',
-          ),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Continuar'),
-            ),
-          ],
-        ),
-      );
-      if (!mounted) return;
-      context.go(RouteNames.creation);
+      _persistSessionAndNavigate(state.response);
     } else if (state is RegisterError) {
       _controller.reset();
-      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(state.message)));
     }
+  }
+
+  Future<void> _persistSessionAndNavigate(AuthResponse response) async {
+    await ref.read(authSessionProvider.notifier).signIn(response);
+    if (!mounted) return;
+    _controller.reset();
+    setState(() {});
+    context.go(_registerDestination(response));
+  }
+
+  static String _registerDestination(AuthResponse response) {
+    if (response.type == UserType.buyer) {
+      return RouteNames.home;
+    }
+    return RouteNames.creation;
   }
 
   void _submit() {

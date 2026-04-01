@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/widgets/logo.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/order_in_progress_card.dart';
@@ -131,7 +133,7 @@ class _RestaurantsPageState extends State<RestaurantsPage> {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => Navigator.maybePop(context),
+            onPressed: () => context.go(RouteNames.home),
             icon: const Icon(Icons.arrow_back_rounded),
             color: AppColors.textDark,
             style: IconButton.styleFrom(
@@ -141,7 +143,6 @@ class _RestaurantsPageState extends State<RestaurantsPage> {
               ),
             ),
           ),
-          const SizedBox(width: 16),
           const Expanded(child: Logo(fontSize: 36)),
         ],
       ),
