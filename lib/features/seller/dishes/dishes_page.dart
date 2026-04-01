@@ -24,20 +24,30 @@ class _DishesPageState extends State<DishesPage> {
     super.initState();
     _controller = DishesController();
     _controller.dailyExpanded.addListener(_onControllerUpdate);
-    _controller.pendingExpanded.addListener(_onControllerUpdate);
     _controller.dailyDishes.addListener(_onControllerUpdate);
   }
 
   @override
   void dispose() {
     _controller.dailyExpanded.removeListener(_onControllerUpdate);
-    _controller.pendingExpanded.removeListener(_onControllerUpdate);
     _controller.dailyDishes.removeListener(_onControllerUpdate);
     _controller.dispose();
     super.dispose();
   }
 
   void _onControllerUpdate() => setState(() {});
+
+  void _openPendingDishesModal() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => _PendingDishesDialog(
+        onSaveToDaily: (dishes) {
+          _controller.addDishesToDaily(dishes);
+          Navigator.of(ctx).pop();
+        },
+      ),
+    );
+  }
 
   void _openEditDailyModal(
     BuildContext context,
@@ -58,14 +68,45 @@ class _DishesPageState extends State<DishesPage> {
   @override
   Widget build(BuildContext context) {
     final dailyExpanded = _controller.dailyExpanded.value;
-    final pendingExpanded = _controller.pendingExpanded.value;
     final dailyDishes = _controller.dailyDishes.value;
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'dishes_pending_camera',
+            onPressed: _openPendingDishesModal,
+            backgroundColor: AppColors.white,
+            foregroundColor: AppColors.primary,
+            elevation: 3,
+            child: const Icon(Icons.photo_camera_outlined),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            heroTag: 'dishes_add',
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                builder: (_) => AddDishModal(
+                  onCreated: (name, type, unit, price) {
+                    // TODO: agregar plato a la lista
+                  },
+                ),
+              );
+            },
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.white,
+            child: const Icon(Icons.add),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 152),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -83,41 +124,72 @@ class _DishesPageState extends State<DishesPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              DishAccordion(
-                title: 'Platos pendientes',
-                isExpanded: pendingExpanded,
-                onToggle: _controller.togglePendingExpanded,
-                trailing: const Icon(
-                  Icons.photo_camera_outlined,
-                  size: 22,
-                  color: AppColors.textDark,
-                ),
-                body: PendingDishesBody(
-                  onSaveToDaily: _controller.addDishesToDaily,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _DishesActionButton(
-                label: 'Agregar nuevo plato',
-                isPrimary: true,
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (_) => AddDishModal(
-                      onCreated: (name, type, unit, price) {
-                        // TODO: agregar plato a la lista
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
               _DishesActionButton(
                 label: 'Usar platos anteriores',
                 isPrimary: false,
                 onPressed: () {
                   showPreviousDishesBottomSheet(context);
                 },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PendingDishesDialog extends StatelessWidget {
+  const _PendingDishesDialog({required this.onSaveToDaily});
+
+  final void Function(List<DailyMenuItem> dishes) onSaveToDaily;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxH = MediaQuery.sizeOf(context).height * 0.88;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Container(
+        constraints: BoxConstraints(maxWidth: 520, maxHeight: maxH),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.textGray.withValues(alpha: 0.3)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxH),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Subir platos con cámara',
+                        style: AppTextStyles.subtitle1.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                      color: AppColors.textDark,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: PendingDishesBody(onSaveToDaily: onSaveToDaily),
+                ),
               ),
             ],
           ),

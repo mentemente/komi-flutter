@@ -13,9 +13,12 @@ class CreationStepTwoForm extends StatelessWidget {
     required this.deliveryCostController,
     required this.selectedPaymentMethods,
     required this.onPaymentMethodToggled,
+    this.onPaymentQrUrlChanged,
+    this.paymentQrRequiredMessage,
     required this.onBack,
     required this.onCreate,
     this.isCreateEnabled = false,
+    this.isSubmitting = false,
   });
 
   final int currentStep;
@@ -27,10 +30,13 @@ class CreationStepTwoForm extends StatelessWidget {
 
   final Set<PaymentMethod> selectedPaymentMethods;
   final void Function(PaymentMethod) onPaymentMethodToggled;
+  final ValueChanged<String?>? onPaymentQrUrlChanged;
+  final String? paymentQrRequiredMessage;
 
   final VoidCallback onBack;
   final VoidCallback onCreate;
   final bool isCreateEnabled;
+  final bool isSubmitting;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +54,8 @@ class CreationStepTwoForm extends StatelessWidget {
         PaymentMethodSection(
           selectedMethods: selectedPaymentMethods,
           onMethodToggled: onPaymentMethodToggled,
+          onPaymentQrUrlChanged: onPaymentQrUrlChanged,
+          qrRequiredMessage: paymentQrRequiredMessage,
         ),
         const SizedBox(height: 48),
         Row(
@@ -66,8 +74,18 @@ class CreationStepTwoForm extends StatelessWidget {
               child: SizedBox(
                 height: 48,
                 child: FilledButton(
-                  onPressed: isCreateEnabled ? onCreate : null,
-                  child: const Text('Crear'),
+                  onPressed:
+                      (isCreateEnabled && !isSubmitting) ? onCreate : null,
+                  child: isSubmitting
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Crear'),
                 ),
               ),
             ),

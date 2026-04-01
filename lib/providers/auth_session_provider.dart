@@ -43,9 +43,7 @@ class AuthSessionNotifier extends Notifier<AuthResponse?> {
         phone: map['phone'] as String,
         type: UserType.fromString(map['type'] as String),
         name: map['name'] as String,
-        stores: (map['stores'] as List<dynamic>)
-            .map((e) => AuthStore.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        stores: _storesFromPayloadMap(map),
       );
       state = session;
       ServiceLocator.httpClient.setToken(token);
@@ -53,6 +51,43 @@ class AuthSessionNotifier extends Notifier<AuthResponse?> {
     } catch (_) {
       await clear();
     }
+  }
+
+  /// Fusiona en disco (`komi_auth_user_payload`) la tienda devuelta en `data` tras `POST /v1/store`.
+  Future<void> addStoreFromApiData(Map<String, dynamic> storeData) async {
+    final id = storeData['id'] as String?;
+    final storeName = storeData['name'] as String?;
+    if (id == null || id.isEmpty || storeName == null || storeName.isEmpty) {
+      return;
+    }
+    final newStore = AuthStore(id: id, name: storeName);
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_kToken);
+    final payload = prefs.getString(_kUserPayload);
+    if (token == null || token.isEmpty || payload == null || payload.isEmpty) {
+      return;
+    }
+
+    final map = jsonDecode(payload) as Map<String, dynamic>;
+    final existing = _storesFromPayloadMap(map);
+    final updated = [...existing.where((s) => s.id != id), newStore];
+
+    final encoded = jsonEncode({
+      'phone': map['phone'],
+      'type': map['type'],
+      'name': map['name'],
+      'stores': updated.map((e) => e.toJson()).toList(),
+    });
+    await prefs.setString(_kUserPayload, encoded);
+
+    state = AuthResponse(
+      token: token,
+      phone: map['phone'] as String,
+      type: UserType.fromString(map['type'] as String),
+      name: map['name'] as String,
+      stores: updated,
+    );
   }
 
   Future<void> signIn(AuthResponse response) async {
@@ -80,4 +115,10 @@ class AuthSessionNotifier extends Notifier<AuthResponse?> {
     ServiceLocator.httpClient.setToken(null);
     authSessionRouterRefresh.notifyChanged();
   }
+}
+
+List<AuthStore> _storesFromPayloadMap(Map<String, dynamic> map) {
+  final raw = map['stores'];
+  if (raw is! List<dynamic>) return [];
+  return raw.map((e) => AuthStore.fromJson(e as Map<String, dynamic>)).toList();
 }

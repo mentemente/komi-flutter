@@ -260,8 +260,8 @@ class _PendingDishesBodyState extends State<PendingDishesBody> {
           height: 48,
           child: FilledButton(
             onPressed: () {
-              widget.onSaveToDaily?.call(_detectedDishes);
-              _reset();
+              widget.onSaveToDaily?.call(List<DailyMenuItem>.from(_detectedDishes));
+              if (mounted) _reset();
             },
             child: const Text('Guardar en "Platos del día"'),
           ),

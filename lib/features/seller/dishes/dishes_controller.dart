@@ -4,24 +4,17 @@ import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 class DishesController {
   DishesController() {
     _dailyExpanded = ValueNotifier<bool>(true);
-    _pendingExpanded = ValueNotifier<bool>(false);
     _dailyDishes = ValueNotifier<List<DailyMenuItem>>([]);
   }
 
   late final ValueNotifier<bool> _dailyExpanded;
-  late final ValueNotifier<bool> _pendingExpanded;
   late final ValueNotifier<List<DailyMenuItem>> _dailyDishes;
 
   ValueNotifier<bool> get dailyExpanded => _dailyExpanded;
-  ValueNotifier<bool> get pendingExpanded => _pendingExpanded;
   ValueNotifier<List<DailyMenuItem>> get dailyDishes => _dailyDishes;
 
   void toggleDailyExpanded() {
     _dailyExpanded.value = !_dailyExpanded.value;
-  }
-
-  void togglePendingExpanded() {
-    _pendingExpanded.value = !_pendingExpanded.value;
   }
 
   void addDishesToDaily(List<DailyMenuItem> dishes) {
@@ -46,7 +39,6 @@ class DishesController {
 
   void dispose() {
     _dailyExpanded.dispose();
-    _pendingExpanded.dispose();
     _dailyDishes.dispose();
   }
 }

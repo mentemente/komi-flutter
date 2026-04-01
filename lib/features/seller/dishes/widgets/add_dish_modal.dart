@@ -4,6 +4,10 @@ import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 
+bool _typeRequiresPrice(MenuItemType type) {
+  return type != MenuItemType.entrada && type != MenuItemType.bebida;
+}
+
 class AddDishModal extends StatefulWidget {
   const AddDishModal({super.key, this.onCreated});
 
@@ -42,9 +46,11 @@ class _AddDishModalState extends State<AddDishModal> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
     final unit = _unitController.text.trim();
-    final price = double.tryParse(
-      _priceController.text.trim().replaceFirst(RegExp(r'^s/\s*'), ''),
-    );
+    final price = _typeRequiresPrice(_selectedType)
+        ? double.tryParse(
+            _priceController.text.trim().replaceFirst(RegExp(r'^s/\s*'), ''),
+          )
+        : null;
     widget.onCreated?.call(name, _selectedType, unit, price);
     Navigator.of(context).pop();
   }
@@ -85,7 +91,7 @@ class _AddDishModalState extends State<AddDishModal> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<MenuItemType>(
-              value: _selectedType,
+              initialValue: _selectedType,
               decoration: InputDecoration(
                 labelText: 'Tipo de comida',
                 filled: true,
@@ -98,6 +104,10 @@ class _AddDishModalState extends State<AddDishModal> {
                 DropdownMenuItem(
                   value: MenuItemType.entrada,
                   child: Text('Entrada'),
+                ),
+                DropdownMenuItem(
+                  value: MenuItemType.bebida,
+                  child: Text('Bebida'),
                 ),
                 DropdownMenuItem(
                   value: MenuItemType.platoSegundo,
@@ -133,26 +143,28 @@ class _AddDishModalState extends State<AddDishModal> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 16,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 's/',
-                      filled: true,
-                      fillColor: AppColors.white,
-                      border: _inputBorder,
-                      enabledBorder: _inputBorder,
+                if (_typeRequiresPrice(_selectedType)) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      style: const TextStyle(
+                        color: AppColors.textDark,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 's/',
+                        filled: true,
+                        fillColor: AppColors.white,
+                        border: _inputBorder,
+                        enabledBorder: _inputBorder,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 16),
@@ -215,12 +227,16 @@ class _EditDishModalState extends State<EditDishModal> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
     final stock = int.tryParse(_unitController.text.trim()) ?? 0;
-    final price = double.tryParse(
-      _priceController.text.trim().replaceFirst(RegExp(r'^s/\s*'), ''),
-    );
-    final priceValue = price != null && !price.isNaN && price > 0
-        ? price
-        : null;
+    final double? priceValue;
+    if (_typeRequiresPrice(_selectedType)) {
+      final parsed = double.tryParse(
+        _priceController.text.trim().replaceFirst(RegExp(r'^s/\s*'), ''),
+      );
+      priceValue =
+          parsed != null && !parsed.isNaN && parsed > 0 ? parsed : null;
+    } else {
+      priceValue = null;
+    }
     final updated = DailyMenuItem(
       name: name,
       price: priceValue,
@@ -268,7 +284,7 @@ class _EditDishModalState extends State<EditDishModal> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<MenuItemType>(
-              value: _selectedType,
+              initialValue: _selectedType,
               decoration: InputDecoration(
                 labelText: 'Tipo de comida',
                 filled: true,
@@ -281,6 +297,10 @@ class _EditDishModalState extends State<EditDishModal> {
                 DropdownMenuItem(
                   value: MenuItemType.entrada,
                   child: Text('Entrada'),
+                ),
+                DropdownMenuItem(
+                  value: MenuItemType.bebida,
+                  child: Text('Bebida'),
                 ),
                 DropdownMenuItem(
                   value: MenuItemType.platoSegundo,
@@ -317,26 +337,28 @@ class _EditDishModalState extends State<EditDishModal> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 16,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 's/',
-                      filled: true,
-                      fillColor: AppColors.white,
-                      border: _inputBorder,
-                      enabledBorder: _inputBorder,
+                if (_typeRequiresPrice(_selectedType)) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      style: const TextStyle(
+                        color: AppColors.textDark,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 's/',
+                        filled: true,
+                        fillColor: AppColors.white,
+                        border: _inputBorder,
+                        enabledBorder: _inputBorder,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 16),
