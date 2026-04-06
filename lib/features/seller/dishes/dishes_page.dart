@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
+import 'package:komi_fe/core/network/api_exception.dart';
+import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
+import 'package:komi_fe/core/widgets/title_profile_header.dart';
 import 'package:komi_fe/features/seller/dishes/dishes_controller.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/add_dish_modal.dart';
@@ -8,16 +14,22 @@ import 'package:komi_fe/features/seller/dishes/widgets/daily_dishes_body.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/dish_accordion.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/pending_dishes_body.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/previous_dishes_bottom_sheet.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
-class DishesPage extends StatefulWidget {
+class DishesPage extends ConsumerStatefulWidget {
   const DishesPage({super.key});
 
   @override
-  State<DishesPage> createState() => _DishesPageState();
+  ConsumerState<DishesPage> createState() => _DishesPageState();
 }
 
-class _DishesPageState extends State<DishesPage> {
+class _DishesPageState extends ConsumerState<DishesPage> {
   late final DishesController _controller;
+  bool _publishingMenu = false;
+
+  List<DailyMenuItem> _catalogFoods = [];
+  bool _catalogLoading = true;
+  String? _catalogError;
 
   @override
   void initState() {
@@ -25,6 +37,50 @@ class _DishesPageState extends State<DishesPage> {
     _controller = DishesController();
     _controller.dailyExpanded.addListener(_onControllerUpdate);
     _controller.dailyDishes.addListener(_onControllerUpdate);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCatalogFoods());
+  }
+
+  Future<void> _loadCatalogFoods() async {
+    final session = ref.read(authSessionProvider);
+    final stores = session?.stores;
+    final storeId = (stores != null && stores.isNotEmpty)
+        ? stores.first.id
+        : null;
+    if (storeId == null || storeId.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _catalogLoading = false;
+        _catalogError = 'No se encontró la tienda.';
+      });
+      return;
+    }
+
+    setState(() {
+      _catalogLoading = true;
+      _catalogError = null;
+    });
+    try {
+      final list = await ServiceLocator.dailyMenuService.listFoods(
+        storeId: storeId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _catalogFoods = list;
+        _catalogLoading = false;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _catalogError = e.displayMessage;
+        _catalogLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _catalogError = '$e';
+        _catalogLoading = false;
+      });
+    }
   }
 
   @override
@@ -47,6 +103,70 @@ class _DishesPageState extends State<DishesPage> {
         },
       ),
     );
+  }
+
+  String _todayDateYmd() {
+    final n = DateTime.now();
+    final m = n.month.toString().padLeft(2, '0');
+    final d = n.day.toString().padLeft(2, '0');
+    return '${n.year}-$m-$d';
+  }
+
+  Future<void> _publishMenuToday() async {
+    final session = ref.read(authSessionProvider);
+    final stores = session?.stores;
+    final storeId = (stores != null && stores.isNotEmpty)
+        ? stores.first.id
+        : null;
+    if (storeId == null || storeId.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se encontró la tienda.')),
+      );
+      return;
+    }
+
+    final foods = List<DailyMenuItem>.from(_controller.dailyDishes.value);
+    if (foods.isEmpty) return;
+
+    setState(() => _publishingMenu = true);
+    try {
+      await ServiceLocator.foodService.publishDailyFood(
+        storeId: storeId,
+        date: _todayDateYmd(),
+        foods: foods,
+      );
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Éxito'),
+          content: const Text('El menú se creó correctamente.'),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                context.go('${RouteNames.seller}${RouteNames.dailyMenu}');
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.displayMessage)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _publishingMenu = false);
+    }
   }
 
   void _openEditDailyModal(
@@ -92,7 +212,13 @@ class _DishesPageState extends State<DishesPage> {
                 context: context,
                 builder: (_) => AddDishModal(
                   onCreated: (name, type, unit, price) {
-                    // TODO: agregar plato a la lista
+                    final item = DailyMenuItem.fromAddDishModal(
+                      name: name,
+                      type: type,
+                      unit: unit,
+                      price: price,
+                    );
+                    _controller.addDishesToDaily([item]);
                   },
                 ),
               );
@@ -110,17 +236,23 @@ class _DishesPageState extends State<DishesPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Mis platos', style: AppTextStyles.h2),
+              TitleProfileHeader(title: 'Mis platos'),
               const SizedBox(height: 20),
               DishAccordion(
                 title: 'Platos del día',
                 isExpanded: dailyExpanded,
                 onToggle: _controller.toggleDailyExpanded,
                 body: DailyDishesBody(
+                  catalogFoods: _catalogFoods,
+                  catalogLoading: _catalogLoading,
+                  catalogError: _catalogError,
+                  onRetryCatalog: _loadCatalogFoods,
                   dailyDishes: dailyDishes,
                   onEditItem: (index, item) =>
                       _openEditDailyModal(context, index, item),
                   onDeleteItem: (index) => _controller.removeDishAt(index),
+                  onPublishToday: _publishMenuToday,
+                  isPublishing: _publishingMenu,
                 ),
               ),
               const SizedBox(height: 8),
@@ -128,7 +260,12 @@ class _DishesPageState extends State<DishesPage> {
                 label: 'Usar platos anteriores',
                 isPrimary: false,
                 onPressed: () {
-                  showPreviousDishesBottomSheet(context);
+                  showPreviousDishesBottomSheet(
+                    context,
+                    onUseToday: (preview) {
+                      _controller.addDishesToDaily([preview.toDailyMenuItem()]);
+                    },
+                  );
                 },
               ),
             ],

@@ -5,7 +5,7 @@ import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 
 bool _typeRequiresPrice(MenuItemType type) {
-  return type != MenuItemType.entrada && type != MenuItemType.bebida;
+  return type != MenuItemType.appetizer && type != MenuItemType.beverage;
 }
 
 class AddDishModal extends StatefulWidget {
@@ -27,7 +27,7 @@ class _AddDishModalState extends State<AddDishModal> {
   final _nameController = TextEditingController();
   final _unitController = TextEditingController();
   final _priceController = TextEditingController();
-  MenuItemType _selectedType = MenuItemType.platoSegundo;
+  MenuItemType _selectedType = MenuItemType.main_course;
 
   static final _inputBorder = OutlineInputBorder(
     borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -102,19 +102,19 @@ class _AddDishModalState extends State<AddDishModal> {
               isExpanded: true,
               items: const [
                 DropdownMenuItem(
-                  value: MenuItemType.entrada,
+                  value: MenuItemType.appetizer,
                   child: Text('Entrada'),
                 ),
                 DropdownMenuItem(
-                  value: MenuItemType.bebida,
+                  value: MenuItemType.beverage,
                   child: Text('Bebida'),
                 ),
                 DropdownMenuItem(
-                  value: MenuItemType.platoSegundo,
+                  value: MenuItemType.main_course,
                   child: Text('Plato de segundo'),
                 ),
                 DropdownMenuItem(
-                  value: MenuItemType.platoALaCarta,
+                  value: MenuItemType.executive_dish,
                   child: Text('Plato a la carta'),
                 ),
               ],
@@ -232,12 +232,14 @@ class _EditDishModalState extends State<EditDishModal> {
       final parsed = double.tryParse(
         _priceController.text.trim().replaceFirst(RegExp(r'^s/\s*'), ''),
       );
-      priceValue =
-          parsed != null && !parsed.isNaN && parsed > 0 ? parsed : null;
+      priceValue = parsed != null && !parsed.isNaN && parsed > 0
+          ? parsed
+          : null;
     } else {
       priceValue = null;
     }
     final updated = DailyMenuItem(
+      id: widget.item.id,
       name: name,
       price: priceValue,
       stock: stock,
@@ -295,19 +297,19 @@ class _EditDishModalState extends State<EditDishModal> {
               isExpanded: true,
               items: const [
                 DropdownMenuItem(
-                  value: MenuItemType.entrada,
+                  value: MenuItemType.appetizer,
                   child: Text('Entrada'),
                 ),
                 DropdownMenuItem(
-                  value: MenuItemType.bebida,
+                  value: MenuItemType.beverage,
                   child: Text('Bebida'),
                 ),
                 DropdownMenuItem(
-                  value: MenuItemType.platoSegundo,
+                  value: MenuItemType.main_course,
                   child: Text('Plato de segundo'),
                 ),
                 DropdownMenuItem(
-                  value: MenuItemType.platoALaCarta,
+                  value: MenuItemType.executive_dish,
                   child: Text('Plato a la carta'),
                 ),
               ],

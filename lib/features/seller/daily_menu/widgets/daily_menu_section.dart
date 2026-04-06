@@ -14,7 +14,7 @@ class DailyMenuSection extends StatelessWidget {
 
   final String title;
   final List<DailyMenuItem> items;
-  final void Function(DailyMenuItem item, bool value) onActiveChanged;
+  final Future<void> Function(DailyMenuItem item, bool value) onActiveChanged;
   final void Function(DailyMenuItem item, String name, double? price, int stock)
   onSave;
 
@@ -24,7 +24,7 @@ class DailyMenuSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: AppTextStyles.h4),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         ...items.map(
           (item) => MenuItemCard(
             item: item,
