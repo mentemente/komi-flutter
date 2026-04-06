@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/network/api_exception.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 
-class MenuItemCard extends StatelessWidget {
+class MenuItemCard extends StatefulWidget {
   const MenuItemCard({
     super.key,
     required this.item,
@@ -12,26 +13,49 @@ class MenuItemCard extends StatelessWidget {
   });
 
   final DailyMenuItem item;
-  final ValueChanged<bool> onActiveChanged;
+  final Future<void> Function(bool value) onActiveChanged;
   final void Function(DailyMenuItem item, String name, double? price, int stock)
   onSave;
 
-  Color get _borderColor => item.type.cardColor;
+  @override
+  State<MenuItemCard> createState() => _MenuItemCardState();
+}
+
+class _MenuItemCardState extends State<MenuItemCard> {
+  bool _busy = false;
+
+  Color get _borderColor => widget.item.type.cardColor;
 
   void _onEditTap(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) => _EditMenuItemModal(
-        item: item,
-        onSave: (name, price, stock) => onSave(item, name, price, stock),
+        item: widget.item,
+        onSave: (name, price, stock) =>
+            widget.onSave(widget.item, name, price, stock),
       ),
     );
+  }
+
+  Future<void> _onSwitchChanged(bool value) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onActiveChanged(value);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.displayMessage)),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -50,7 +74,7 @@ class MenuItemCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        item.name,
+                        widget.item.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.subtitle2.copyWith(
@@ -58,10 +82,10 @@ class MenuItemCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (item.price != null) ...[
+                    if (widget.item.price != null) ...[
                       const SizedBox(width: 6),
                       Text(
-                        'S/${item.price!.toStringAsFixed(0)}',
+                        'S/${widget.item.price!.toStringAsFixed(0)}',
                         style: AppTextStyles.small.copyWith(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.w500,
@@ -72,7 +96,7 @@ class MenuItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Stock: ${item.stock}',
+                  'Stock: ${widget.item.stock}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.small.copyWith(
@@ -83,15 +107,15 @@ class MenuItemCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () => _onEditTap(context),
+            onPressed: _busy ? null : () => _onEditTap(context),
             icon: const Icon(Icons.edit_outlined),
             color: AppColors.textGray,
             iconSize: 22,
             style: IconButton.styleFrom(minimumSize: const Size(40, 40)),
           ),
           Switch(
-            value: item.isActive,
-            onChanged: onActiveChanged,
+            value: widget.item.isActive,
+            onChanged: _busy ? null : _onSwitchChanged,
             activeTrackColor: AppColors.primary,
             activeThumbColor: AppColors.white,
             inactiveTrackColor: AppColors.textGray.withValues(alpha: 0.35),

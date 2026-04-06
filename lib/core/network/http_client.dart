@@ -16,34 +16,68 @@ class HttpClient {
     if (_token != null) 'Authorization': 'Bearer $_token',
   };
 
-  /// POST request. Retorna `data` parseado con [fromJson].
+  /// POST request. Returns `data` parsed with [fromJson].
+  /// [headers] is merged with the default headers (e.g. `store-id`).
   Future<T> post<T>(
     String path, {
     required T Function(Map<String, dynamic>) fromJson,
     Map<String, dynamic>? body,
+    Map<String, String>? headers,
   }) async {
+    final mergedHeaders = {..._headers, ...?headers};
     final response = await http.post(
       Uri.parse('$baseUrl$path'),
-      headers: _headers,
+      headers: mergedHeaders,
       body: body != null ? jsonEncode(body) : null,
     );
     return _handleResponse(response, fromJson);
   }
 
-  /// GET request. Retorna `data` parseado con [fromJson].
+  /// POST when `data` in the response is a **list** (e.g. `POST /v1/food`).
+  Future<List<Map<String, dynamic>>> postList(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
+    final mergedHeaders = {..._headers, ...?headers};
+    final response = await http.post(
+      Uri.parse('$baseUrl$path'),
+      headers: mergedHeaders,
+      body: body != null ? jsonEncode(body) : null,
+    );
+    return _handleListDataResponse(response);
+  }
+
+  /// GET request. Returns `data` parsed with [fromJson].
   Future<T> get<T>(
     String path, {
     required T Function(Map<String, dynamic>) fromJson,
     Map<String, String>? queryParams,
+    Map<String, String>? headers,
   }) async {
     final uri = Uri.parse(
       '$baseUrl$path',
     ).replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: _headers);
+    final mergedHeaders = {..._headers, ...?headers};
+    final response = await http.get(uri, headers: mergedHeaders);
     return _handleResponse(response, fromJson);
   }
 
-  /// PUT request. Retorna `data` parseado con [fromJson].
+  /// GET when `data` is a **list** (e.g. `GET /v1/food`).
+  Future<List<Map<String, dynamic>>> getList(
+    String path, {
+    Map<String, String>? queryParams,
+    Map<String, String>? headers,
+  }) async {
+    final uri = Uri.parse(
+      '$baseUrl$path',
+    ).replace(queryParameters: queryParams);
+    final mergedHeaders = {..._headers, ...?headers};
+    final response = await http.get(uri, headers: mergedHeaders);
+    return _handleListDataResponse(response);
+  }
+
+  /// PUT request. Returns `data` parsed with [fromJson].
   Future<T> put<T>(
     String path, {
     required T Function(Map<String, dynamic>) fromJson,
@@ -57,7 +91,23 @@ class HttpClient {
     return _handleResponse(response, fromJson);
   }
 
-  /// DELETE request. Retorna `data` parseado con [fromJson].
+  /// PATCH request. Returns `data` parsed with [fromJson].
+  Future<T> patch<T>(
+    String path, {
+    required T Function(Map<String, dynamic>) fromJson,
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
+    final mergedHeaders = {..._headers, ...?headers};
+    final response = await http.patch(
+      Uri.parse('$baseUrl$path'),
+      headers: mergedHeaders,
+      body: body != null ? jsonEncode(body) : null,
+    );
+    return _handleResponse(response, fromJson);
+  }
+
+  /// DELETE request. Returns `data` parsed with [fromJson].
   Future<T> delete<T>(
     String path, {
     required T Function(Map<String, dynamic>) fromJson,
@@ -69,8 +119,8 @@ class HttpClient {
     return _handleResponse(response, fromJson);
   }
 
-  /// POST `multipart/form-data` (p. ej. imágenes). Incluye `Authorization: Bearer` si hay token.
-  /// Usa bytes (p. ej. [XFile.readAsBytes]) para que funcione con `content://` en Android.
+  /// POST `multipart/form-data` (e.g. images). Includes `Authorization: Bearer` if there is a token.
+  /// Uses bytes (e.g. [XFile.readAsBytes]) to work with `content://` on Android.
   Future<Map<String, dynamic>> postMultipart(
     String path, {
     required Map<String, String> fields,
@@ -190,9 +240,30 @@ class HttpClient {
       details: json['details'],
     );
   }
+
+  List<Map<String, dynamic>> _handleListDataResponse(http.Response response) {
+    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    if (json['success'] == true) {
+      final data = json['data'];
+      if (data is List) {
+        return [
+          for (final e in data)
+            Map<String, dynamic>.from(e as Map<dynamic, dynamic>),
+        ];
+      }
+      return [];
+    }
+
+    throw ApiException(
+      code: json['code'] as String? ?? 'ERROR',
+      status: json['status'] as int? ?? response.statusCode,
+      message: json['message'] as String? ?? 'Error',
+      details: json['details'],
+    );
+  }
 }
 
-/// MIME de la parte del archivo multipart (evita `application/octet-stream`).
+/// MIME of the multipart file part (avoids `application/octet-stream`).
 MediaType _imageMediaTypeForFilename(String filename) {
   final dot = filename.lastIndexOf('.');
   final ext = dot >= 0 && dot < filename.length - 1

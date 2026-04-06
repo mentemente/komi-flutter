@@ -71,7 +71,7 @@ class OverviewOrdersSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Ordenes activas', style: AppTextStyles.h3),
+            Text('Ordenes activas', style: AppTextStyles.h4),
             GestureDetector(
               onTap: () {
                 context.go('${RouteNames.seller}${RouteNames.orders}');

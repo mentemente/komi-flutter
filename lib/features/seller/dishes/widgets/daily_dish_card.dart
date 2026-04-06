@@ -9,11 +9,14 @@ class DailyDishCard extends StatelessWidget {
     required this.item,
     this.onEdit,
     this.onDelete,
+    this.readOnly = false,
   });
 
   final DailyMenuItem item;
   final void Function(DailyMenuItem item)? onEdit;
   final void Function(DailyMenuItem item)? onDelete;
+
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -70,20 +73,22 @@ class DailyDishCard extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: onEdit != null ? () => onEdit!(item) : null,
-            icon: const Icon(Icons.edit_outlined),
-            color: AppColors.textGray,
-            iconSize: 22,
-            style: IconButton.styleFrom(minimumSize: const Size(40, 40)),
-          ),
-          IconButton(
-            onPressed: onDelete != null ? () => onDelete!(item) : null,
-            icon: const Icon(Icons.delete_outlined),
-            color: AppColors.textGray,
-            iconSize: 22,
-            style: IconButton.styleFrom(minimumSize: const Size(40, 40)),
-          ),
+          if (!readOnly) ...[
+            IconButton(
+              onPressed: onEdit != null ? () => onEdit!(item) : null,
+              icon: const Icon(Icons.edit_outlined),
+              color: AppColors.textGray,
+              iconSize: 22,
+              style: IconButton.styleFrom(minimumSize: const Size(40, 40)),
+            ),
+            IconButton(
+              onPressed: onDelete != null ? () => onDelete!(item) : null,
+              icon: const Icon(Icons.delete_outlined),
+              color: AppColors.textGray,
+              iconSize: 22,
+              style: IconButton.styleFrom(minimumSize: const Size(40, 40)),
+            ),
+          ],
         ],
       ),
     );

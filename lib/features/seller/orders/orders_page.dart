@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:komi_fe/core/widgets/order_card.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
-import 'package:komi_fe/core/widgets/order_card.dart';
+import 'package:komi_fe/core/widgets/title_profile_header.dart';
 import 'package:komi_fe/features/seller/orders/widgets/orders_filter_sheet.dart';
 
 class OrdersPage extends StatefulWidget {
@@ -33,7 +34,7 @@ class _OrdersPageState extends State<OrdersPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Ordenes activas', style: AppTextStyles.h2),
+              TitleProfileHeader(title: 'Ordenes activas'),
               const SizedBox(height: 16),
               Row(
                 children: [
