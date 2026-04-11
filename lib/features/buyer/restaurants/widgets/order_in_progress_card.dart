@@ -3,10 +3,7 @@ import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 
 class OrderInProgressCard extends StatelessWidget {
-  const OrderInProgressCard({
-    super.key,
-    this.onTapTracking,
-  });
+  const OrderInProgressCard({super.key, this.onTapTracking});
 
   final VoidCallback? onTapTracking;
 
@@ -36,7 +33,7 @@ class OrderInProgressCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Pedido en curso',
+                    'Pedidos en curso',
                     style: AppTextStyles.h5.copyWith(
                       fontWeight: FontWeight.w700,
                     ),

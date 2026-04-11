@@ -76,7 +76,7 @@ class RestaurantCard extends StatelessWidget {
   Widget _buildLeftSection() {
     return Container(
       color: AppColors.white,
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -101,123 +101,118 @@ class RestaurantCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 16,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Recojo',
-                            style: AppTextStyles.overline.copyWith(
-                              color: AppColors.textGray,
-                              fontSize: 12,
-                            ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 16,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Recojo',
+                          style: AppTextStyles.overline.copyWith(
+                            color: AppColors.textGray,
+                            fontSize: 12,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      SizedBox(
-                        height: 36,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.directions_walk_rounded,
-                              size: 24,
-                              color: data.hasPickup
-                                  ? AppColors.textDark
-                                  : AppColors.textGray,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                              ),
-                              child: Text(
-                                '/',
-                                style: AppTextStyles.small.copyWith(
-                                  color: AppColors.textGray,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            Icon(
-                              Icons.electric_moped_rounded,
-                              size: 24,
-                              color: data.hasDelivery
-                                  ? AppColors.textDark
-                                  : AppColors.textGray,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 16,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Pago',
-                            style: AppTextStyles.overline.copyWith(
-                              color: AppColors.textGray,
-                              fontSize: 12,
-                            ),
+                    ),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      height: 36,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.directions_walk_rounded,
+                            size: 24,
+                            color: data.hasPickup
+                                ? AppColors.textDark
+                                : AppColors.textGray,
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      SizedBox(
-                        height: 36,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            if (data.hasYapePlin)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 4),
-                                child: Image.asset(
-                                  'assets/images/yape_plin.webp',
-                                  height: 24,
-                                  width: 56,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, _, _) => Icon(
-                                    Icons.phone_android,
-                                    size: 28,
-                                    color: AppColors.textGray,
-                                  ),
-                                ),
-                              ),
-                            if (data.hasYapePlin && data.hasCash)
-                              Text(
-                                ' / ',
-                                style: AppTextStyles.small.copyWith(
-                                  color: AppColors.textGray,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            if (data.hasCash)
-                              Icon(
-                                Icons.payments_outlined,
-                                size: 24,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              '/',
+                              style: AppTextStyles.small.copyWith(
                                 color: AppColors.textGray,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
                               ),
-                          ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.electric_moped_rounded,
+                            size: 24,
+                            color: data.hasDelivery
+                                ? AppColors.textDark
+                                : AppColors.textGray,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 16,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Pago',
+                          style: AppTextStyles.overline.copyWith(
+                            color: AppColors.textGray,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      height: 36,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (data.hasYapePlin)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Image.asset(
+                                'assets/images/yape_plin.webp',
+                                height: 24,
+                                width: 56,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, _, _) => Icon(
+                                  Icons.phone_android,
+                                  size: 28,
+                                  color: AppColors.textGray,
+                                ),
+                              ),
+                            ),
+                          if (data.hasYapePlin && data.hasCash)
+                            Text(
+                              ' / ',
+                              style: AppTextStyles.small.copyWith(
+                                color: AppColors.textGray,
+                                fontSize: 12,
+                              ),
+                            ),
+                          if (data.hasCash)
+                            Icon(
+                              Icons.payments_outlined,
+                              size: 24,
+                              color: AppColors.textGray,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

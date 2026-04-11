@@ -68,21 +68,21 @@ class PreviousDishPreview {
 
 Future<void> showPreviousDishesBottomSheet(
   BuildContext context, {
-  void Function(PreviousDishPreview dish)? onUseToday,
+  void Function(List<PreviousDishPreview> dishes)? onAddSelected,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     useSafeArea: false,
-    builder: (ctx) => _PreviousDishesSheet(onUseToday: onUseToday),
+    builder: (ctx) => _PreviousDishesSheet(onAddSelected: onAddSelected),
   );
 }
 
 class _PreviousDishesSheet extends ConsumerStatefulWidget {
-  const _PreviousDishesSheet({this.onUseToday});
+  const _PreviousDishesSheet({this.onAddSelected});
 
-  final void Function(PreviousDishPreview dish)? onUseToday;
+  final void Function(List<PreviousDishPreview> dishes)? onAddSelected;
 
   @override
   ConsumerState<_PreviousDishesSheet> createState() =>
@@ -93,8 +93,27 @@ class _PreviousDishesSheetState extends ConsumerState<_PreviousDishesSheet> {
   List<PreviousDishPreview> _items = [];
   bool _loading = true;
   String? _error;
+  final Set<int> _selectedIndices = {};
 
   static const double _sheetTopRadius = 28;
+
+  void _toggleIndex(int index) {
+    setState(() {
+      if (_selectedIndices.contains(index)) {
+        _selectedIndices.remove(index);
+      } else {
+        _selectedIndices.add(index);
+      }
+    });
+  }
+
+  void _confirmSelection() {
+    if (_selectedIndices.isEmpty) return;
+    final sorted = _selectedIndices.toList()..sort();
+    final dishes = sorted.map((i) => _items[i]).toList();
+    widget.onAddSelected?.call(dishes);
+    Navigator.of(context).pop();
+  }
 
   @override
   void initState() {
@@ -133,6 +152,7 @@ class _PreviousDishesSheetState extends ConsumerState<_PreviousDishesSheet> {
       if (!mounted) return;
       setState(() {
         _items = raw.map(PreviousDishPreview.fromApiMap).toList();
+        _selectedIndices.clear();
         _loading = false;
         _error = null;
       });
@@ -163,7 +183,7 @@ class _PreviousDishesSheetState extends ConsumerState<_PreviousDishesSheet> {
         color: Colors.transparent,
         child: Container(
           width: double.infinity,
-          constraints: BoxConstraints(maxHeight: media.size.height * 0.72),
+          height: media.size.height * 0.72,
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: const BorderRadius.only(
@@ -172,91 +192,111 @@ class _PreviousDishesSheetState extends ConsumerState<_PreviousDishesSheet> {
             ),
             border: Border.all(color: AppColors.textDark, width: 1),
           ),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 20 + safeBottom),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                    child: Text(
-                      'Usar platos anteriores',
-                      style: AppTextStyles.h4.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
-                      ),
-                    ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                child: Text(
+                  'Usar platos anteriores',
+                  style: AppTextStyles.h4.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textDark,
                   ),
-                  if (_loading)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    )
-                  else if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            _error!,
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: _items.isNotEmpty && !_loading && _error == null
+                        ? 8
+                        : 20 + safeBottom,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_loading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        )
+                      else if (_error != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 16,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                _error!,
+                                style: AppTextStyles.body.copyWith(
+                                  color: AppColors.textGray,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              FilledButton(
+                                onPressed: _load,
+                                child: const Text('Reintentar'),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (_items.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            'No hay platos anteriores disponibles.',
                             style: AppTextStyles.body.copyWith(
                               color: AppColors.textGray,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          FilledButton(
-                            onPressed: _load,
-                            child: const Text('Reintentar'),
-                          ),
-                        ],
-                      ),
-                    )
-                  else if (_items.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
-                      child: Text(
-                        'No hay platos anteriores disponibles.',
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.textGray,
-                        ),
-                      ),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                      child: Column(
-                        children: List.generate(_items.length, (index) {
+                        )
+                      else
+                        ...List.generate(_items.length, (index) {
                           final dish = _items[index];
+                          final selected = _selectedIndices.contains(index);
                           return Padding(
                             padding: EdgeInsets.only(
                               bottom: index < _items.length - 1 ? 10 : 0,
                             ),
                             child: _PreviousDishCard(
                               dish: dish,
-                              onUseToday: () {
-                                widget.onUseToday?.call(dish);
-                                Navigator.of(context).pop();
-                              },
+                              isSelected: selected,
+                              onToggle: () => _toggleIndex(index),
                             ),
                           );
                         }),
+                    ],
+                  ),
+                ),
+              ),
+              if (_items.isNotEmpty && !_loading && _error == null)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 12 + safeBottom),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton(
+                      onPressed: _selectedIndices.isEmpty
+                          ? null
+                          : _confirmSelection,
+                      child: Text(
+                        _selectedIndices.isEmpty
+                            ? 'Selecciona platos'
+                            : 'Agregar al menú de hoy (${_selectedIndices.length})',
                       ),
                     ),
-                ],
-              ),
-            ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -265,93 +305,84 @@ class _PreviousDishesSheetState extends ConsumerState<_PreviousDishesSheet> {
 }
 
 class _PreviousDishCard extends StatelessWidget {
-  const _PreviousDishCard({required this.dish, required this.onUseToday});
+  const _PreviousDishCard({
+    required this.dish,
+    required this.isSelected,
+    required this.onToggle,
+  });
 
   final PreviousDishPreview dish;
-  final VoidCallback onUseToday;
+  final bool isSelected;
+  final VoidCallback onToggle;
 
   static const double _cardRadius = 12;
 
   @override
   Widget build(BuildContext context) {
     final borderColor = dish.cardColor;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(_cardRadius),
-        border: Border.all(color: borderColor, width: 2),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        dish.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.subtitle2.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                    ),
-                    if (dish.priceLabel != null) ...[
-                      const SizedBox(width: 6),
-                      Text(
-                        dish.priceLabel!,
-                        style: AppTextStyles.small.copyWith(
-                          color: AppColors.textDark,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          _UsarHoyButton(onPressed: onUseToday),
-        ],
-      ),
-    );
-  }
-}
-
-class _UsarHoyButton extends StatelessWidget {
-  const _UsarHoyButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
     return Material(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.textDark, width: 1),
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(_cardRadius),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.06)
+              : AppColors.white,
+          borderRadius: BorderRadius.circular(_cardRadius),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : borderColor,
+            width: isSelected ? 2.5 : 2,
           ),
-          child: Text(
-            'Usar hoy',
-            style: AppTextStyles.small.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.textDark,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: onToggle,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          dish.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.subtitle2.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ),
+                      if (dish.priceLabel != null) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          dish.priceLabel!,
+                          style: AppTextStyles.small.copyWith(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
+            Checkbox(
+              value: isSelected,
+              onChanged: (_) => onToggle(),
+              activeColor: AppColors.primary,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
         ),
       ),
     );

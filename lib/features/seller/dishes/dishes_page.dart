@@ -262,8 +262,10 @@ class _DishesPageState extends ConsumerState<DishesPage> {
                 onPressed: () {
                   showPreviousDishesBottomSheet(
                     context,
-                    onUseToday: (preview) {
-                      _controller.addDishesToDaily([preview.toDailyMenuItem()]);
+                    onAddSelected: (previews) {
+                      _controller.addDishesToDaily(
+                        previews.map((p) => p.toDailyMenuItem()).toList(),
+                      );
                     },
                   );
                 },
@@ -336,7 +338,6 @@ class _PendingDishesDialog extends StatelessWidget {
   }
 }
 
-/// Botón de acción debajo de los acordeones. Estilo alineado con [DishAccordion].
 class _DishesActionButton extends StatelessWidget {
   const _DishesActionButton({
     required this.label,

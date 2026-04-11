@@ -13,7 +13,7 @@ class StoreService {
   Future<Map<String, dynamic>> createStore({
     required String name,
     required String description,
-    required String imageUrl,
+    required String paymentQr,
     required List<Map<String, dynamic>> schedules,
     required bool pickupEnabled,
     required bool deliveryEnabled,
@@ -26,7 +26,7 @@ class StoreService {
       body: {
         'name': name,
         'description': description,
-        'imageUrl': imageUrl,
+        'paymentQr': paymentQr,
         'location': testLocation,
         'schedules': schedules,
         'pickupEnabled': pickupEnabled,

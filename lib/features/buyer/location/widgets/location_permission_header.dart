@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/widgets/logo.dart';
+import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
 
 class LocationPermissionHeader extends StatelessWidget {
-  const LocationPermissionHeader({super.key, required this.onBack});
+  const LocationPermissionHeader({super.key, this.onBack});
 
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
+
+  void _goBack(BuildContext context) {
+    if (onBack != null) {
+      onBack!();
+      return;
+    }
+    if (GoRouter.of(context).canPop()) {
+      context.pop();
+    } else {
+      context.go(RouteNames.home);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +28,7 @@ class LocationPermissionHeader extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: onBack,
+            onPressed: () => _goBack(context),
             icon: const Icon(Icons.arrow_back_rounded),
             color: AppColors.textDark,
             style: IconButton.styleFrom(

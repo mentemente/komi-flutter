@@ -4,6 +4,7 @@ import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/widgets/logo.dart';
+import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/order_in_progress_card.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/restaurant_card.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/restaurants_filter_sheet.dart';
@@ -90,38 +91,42 @@ class _RestaurantsPageState extends State<RestaurantsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Row(
-                children: [
-                  Expanded(child: _buildSearchBar()),
-                  const SizedBox(width: 12),
-                  _buildFilterButton(),
-                ],
+      body: MobileViewportContainer(
+        backgroundColor: AppColors.background,
+        panelColor: AppColors.background,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Row(
+                  children: [
+                    Expanded(child: _buildSearchBar()),
+                    const SizedBox(width: 12),
+                    _buildFilterButton(),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: OrderInProgressCard(onTapTracking: () {}),
-                  ),
-                  for (final card in _exampleCards)
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  children: [
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: RestaurantCard(data: card, onTap: () {}),
+                      child: OrderInProgressCard(onTapTracking: () {}),
                     ),
-                ],
+                    for (final card in _exampleCards)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: RestaurantCard(data: card, onTap: () {}),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

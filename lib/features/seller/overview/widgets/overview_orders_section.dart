@@ -1,68 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
+import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/widgets/order_card.dart';
+import 'package:komi_fe/features/seller/orders/orders_controller.dart';
+import 'package:komi_fe/features/seller/orders/orders_state.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
-class OverviewOrdersSection extends StatelessWidget {
+class OverviewOrdersSection extends ConsumerStatefulWidget {
   const OverviewOrdersSection({super.key});
+
+  static const int _previewCount = 3;
+
+  static const String overviewStatusQuery = 'pending,ready,delivered,confirmed';
+
+  @override
+  ConsumerState<OverviewOrdersSection> createState() =>
+      _OverviewOrdersSectionState();
+}
+
+class _OverviewOrdersSectionState extends ConsumerState<OverviewOrdersSection> {
+  late final OrdersController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = OrdersController(ServiceLocator.ordersService);
+    _controller.state.addListener(_onStateChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  void _onStateChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _load() {
+    final session = ref.read(authSessionProvider);
+    final storeId = session?.stores.isNotEmpty == true
+        ? session!.stores.first.id
+        : null;
+    _controller.loadOrders(
+      storeId: storeId,
+      status: OverviewOrdersSection.overviewStatusQuery,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.state.removeListener(_onStateChanged);
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Fetch orders from API
-    const orders = [
-      OrderCardData(
-        customerName: 'Dayra Barboza',
-        deliveryType: DeliveryType.pickup,
-        paymentMethods: ['yape_plin'],
-        amount: 40,
-        timeAgo: 'Hace 15 minutos',
-        status: OrderStatus.pending,
-        orderNumber: 'ORD-001',
-        dishes: [
-          OrderDish(
-            name: 'Arroz con pollo',
-            quantity: 2,
-            description: 'Papa a la huancaína',
-          ),
-          OrderDish(name: 'Seco con frejoles', quantity: 1),
-        ],
-        notes: 'De preferencia parte pecho los dos arroces',
-      ),
-      OrderCardData(
-        customerName: 'Carlos Mendoza',
-        deliveryType: DeliveryType.delivery,
-        paymentMethods: ['yape_plin'],
-        amount: 28.50,
-        timeAgo: 'Hace 32 minutos',
-        status: OrderStatus.shipped,
-        orderNumber: 'ORD-002',
-        dishes: [
-          OrderDish(name: 'Lomo saltado', quantity: 1),
-          OrderDish(name: 'Causa rellena', quantity: 2),
-          OrderDish(name: 'Chicha morada', quantity: 2),
-        ],
-        notes: 'Entregar en portón azul, 2do piso',
-      ),
-      OrderCardData(
-        customerName: 'María Flores',
-        deliveryType: DeliveryType.pickup,
-        paymentMethods: ['cash'],
-        amount: 55,
-        timeAgo: 'Hace 5 minutos',
-        status: OrderStatus.completed,
-        orderNumber: 'ORD-003',
-        dishes: [
-          OrderDish(
-            name: 'Ají de gallina',
-            quantity: 1,
-            description: 'Porción familiar',
-          ),
-          OrderDish(name: 'Ensalada fresca', quantity: 2),
-        ],
-      ),
-    ];
+    final state = _controller.state.value;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,13 +83,54 @@ class OverviewOrdersSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ...orders.map(
-          (order) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: OrderCard(data: order),
-          ),
-        ),
+        if (state is OrdersLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          )
+        else if (state is OrdersError)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  state.message,
+                  style: AppTextStyles.body.copyWith(color: AppColors.textGray),
+                ),
+                TextButton(onPressed: _load, child: const Text('Reintentar')),
+              ],
+            ),
+          )
+        else if (state is OrdersReady)
+          ..._buildOrderCards(state),
       ],
     );
+  }
+
+  List<Widget> _buildOrderCards(OrdersReady state) {
+    if (state.orders.isEmpty) {
+      return [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'No hay órdenes activas.',
+            style: AppTextStyles.body.copyWith(color: AppColors.textGray),
+          ),
+        ),
+      ];
+    }
+
+    return state.orders
+        .take(OverviewOrdersSection._previewCount)
+        .map(
+          (order) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: OrderCard(data: order.toCardData()),
+          ),
+        )
+        .toList();
   }
 }

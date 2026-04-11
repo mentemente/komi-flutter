@@ -6,7 +6,14 @@ enum OrdersPaymentFilter { yapePlin, cash }
 
 enum OrdersDeliveryFilter { pickup, delivery }
 
-enum OrdersStatusFilter { pending, paid, shipped, completed }
+enum OrdersStatusFilter {
+  pending,
+  confirmed,
+  ready,
+  delivered,
+  completed,
+  cancelled,
+}
 
 class OrdersFilterSheet extends StatefulWidget {
   const OrdersFilterSheet({
@@ -24,7 +31,8 @@ class OrdersFilterSheet extends StatefulWidget {
     OrdersPaymentFilter? payment,
     OrdersDeliveryFilter? delivery,
     OrdersStatusFilter? status,
-  ) onApply;
+  )
+  onApply;
 
   static Future<void> show(
     BuildContext context, {
@@ -36,7 +44,7 @@ class OrdersFilterSheet extends StatefulWidget {
       OrdersDeliveryFilter? delivery,
       OrdersStatusFilter? status,
     )
-        onApply,
+    onApply,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -267,20 +275,32 @@ class _OrdersFilterSheetState extends State<OrdersFilterSheet> {
               onTap: (v) => setState(() => _status = v),
             ),
             _StatusChip(
-              label: 'Pagado',
-              value: OrdersStatusFilter.paid,
+              label: 'Confirmado',
+              value: OrdersStatusFilter.confirmed,
               groupValue: _status,
               onTap: (v) => setState(() => _status = v),
             ),
             _StatusChip(
-              label: 'Enviado',
-              value: OrdersStatusFilter.shipped,
+              label: 'Listo',
+              value: OrdersStatusFilter.ready,
+              groupValue: _status,
+              onTap: (v) => setState(() => _status = v),
+            ),
+            _StatusChip(
+              label: 'Entregado',
+              value: OrdersStatusFilter.delivered,
               groupValue: _status,
               onTap: (v) => setState(() => _status = v),
             ),
             _StatusChip(
               label: 'Completado',
               value: OrdersStatusFilter.completed,
+              groupValue: _status,
+              onTap: (v) => setState(() => _status = v),
+            ),
+            _StatusChip(
+              label: 'Cancelado',
+              value: OrdersStatusFilter.cancelled,
               groupValue: _status,
               onTap: (v) => setState(() => _status = v),
             ),
@@ -335,8 +355,9 @@ class _FilterChip extends StatelessWidget {
                     label,
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textDark,
-                      fontWeight:
-                          selected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -398,3 +419,28 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
+/// Labels for active filter chips (aligned with the bottom sheet).
+extension OrdersPaymentFilterBadgeLabel on OrdersPaymentFilter {
+  String get badgeLabel => switch (this) {
+    OrdersPaymentFilter.yapePlin => 'Yape/Plin',
+    OrdersPaymentFilter.cash => 'Efectivo',
+  };
+}
+
+extension OrdersDeliveryFilterBadgeLabel on OrdersDeliveryFilter {
+  String get badgeLabel => switch (this) {
+    OrdersDeliveryFilter.pickup => 'Para recoger',
+    OrdersDeliveryFilter.delivery => 'Delivery',
+  };
+}
+
+extension OrdersStatusFilterBadgeLabel on OrdersStatusFilter {
+  String get badgeLabel => switch (this) {
+    OrdersStatusFilter.pending => 'Pendiente',
+    OrdersStatusFilter.confirmed => 'Confirmado',
+    OrdersStatusFilter.ready => 'Listo',
+    OrdersStatusFilter.delivered => 'Entregado',
+    OrdersStatusFilter.completed => 'Completado',
+    OrdersStatusFilter.cancelled => 'Cancelado',
+  };
+}

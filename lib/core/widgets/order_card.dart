@@ -4,19 +4,68 @@ import 'package:komi_fe/core/theme/app_text_styles.dart';
 
 enum DeliveryType { pickup, delivery }
 
-enum OrderStatus { completed, shipped, paid, pending }
+enum OrderStatus {
+  pending,
+  confirmed,
+  ready,
+  delivered,
+  completed,
+  cancelled;
+
+  String get apiValue => name;
+
+  static OrderStatus fromApi(String? raw) {
+    switch (raw) {
+      case 'pending':
+        return OrderStatus.pending;
+      case 'confirmed':
+        return OrderStatus.confirmed;
+      case 'ready':
+        return OrderStatus.ready;
+      case 'delivered':
+        return OrderStatus.delivered;
+      case 'completed':
+        return OrderStatus.completed;
+      case 'cancelled':
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.pending;
+    }
+  }
+}
 
 extension OrderStatusBorderColor on OrderStatus {
   Color get borderColor {
     switch (this) {
-      case OrderStatus.completed:
-        return const Color(0xFF10B981);
-      case OrderStatus.shipped:
-        return const Color(0xFFF59E0B);
-      case OrderStatus.paid:
-        return const Color(0xFF3B82F6);
       case OrderStatus.pending:
-        return const Color(0xFFEF4444);
+        return const Color(0xFFCA8A04);
+      case OrderStatus.confirmed:
+        return const Color(0xFF2563EB);
+      case OrderStatus.ready:
+        return const Color(0xFF16A34A);
+      case OrderStatus.delivered:
+        return const Color(0xFF0891B2);
+      case OrderStatus.completed:
+        return const Color(0xFF059669);
+      case OrderStatus.cancelled:
+        return const Color(0xFF64748B);
+    }
+  }
+
+  String get labelEs {
+    switch (this) {
+      case OrderStatus.pending:
+        return 'Pendiente';
+      case OrderStatus.confirmed:
+        return 'Confirmado';
+      case OrderStatus.ready:
+        return 'Listo';
+      case OrderStatus.delivered:
+        return 'Entregado';
+      case OrderStatus.completed:
+        return 'Completado';
+      case OrderStatus.cancelled:
+        return 'Cancelado';
     }
   }
 }
@@ -78,17 +127,22 @@ class _OrderCardState extends State<OrderCard> {
 
   Color get _borderColor => _status.borderColor;
 
-  String get _statusLabel {
-    switch (_status) {
-      case OrderStatus.completed:
-        return 'Completado';
-      case OrderStatus.shipped:
-        return 'Enviado';
-      case OrderStatus.paid:
-        return 'Pagado';
-      case OrderStatus.pending:
-        return 'Pendiente';
+  String get _statusLabel => _status.labelEs;
+
+  bool get _isTerminalCompleted => _status == OrderStatus.completed;
+
+  bool get _isTerminalCancelled => _status == OrderStatus.cancelled;
+
+  bool get _isTerminalVisual => _isTerminalCompleted || _isTerminalCancelled;
+
+  Color get _cardBackgroundColor {
+    if (_isTerminalCancelled) {
+      return const Color(0xFFF8FAFC);
     }
+    if (_isTerminalCompleted) {
+      return const Color(0xFFF0FDF4);
+    }
+    return AppColors.white;
   }
 
   Future<void> _showStatusDialog() async {
@@ -113,29 +167,13 @@ class _OrderCardState extends State<OrderCard> {
                 const SizedBox(height: 8),
                 Divider(color: AppColors.textGray.withValues(alpha: 0.2)),
                 const SizedBox(height: 4),
-                _StatusOptionTile(
-                  label: 'Completado',
-                  value: OrderStatus.completed,
-                  groupValue: _status,
-                  onSelected: (v) => Navigator.of(context).pop(v),
-                ),
-                _StatusOptionTile(
-                  label: 'Enviado',
-                  value: OrderStatus.shipped,
-                  groupValue: _status,
-                  onSelected: (v) => Navigator.of(context).pop(v),
-                ),
-                _StatusOptionTile(
-                  label: 'Pagado',
-                  value: OrderStatus.paid,
-                  groupValue: _status,
-                  onSelected: (v) => Navigator.of(context).pop(v),
-                ),
-                _StatusOptionTile(
-                  label: 'Pendiente',
-                  value: OrderStatus.pending,
-                  groupValue: _status,
-                  onSelected: (v) => Navigator.of(context).pop(v),
+                ...OrderStatus.values.map(
+                  (s) => _StatusOptionTile(
+                    label: s.labelEs,
+                    value: s,
+                    groupValue: _status,
+                    onSelected: (v) => Navigator.of(context).pop(v),
+                  ),
                 ),
               ],
             ),
@@ -156,12 +194,55 @@ class _OrderCardState extends State<OrderCard> {
       curve: Curves.easeInOut,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: _cardBackgroundColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _borderColor, width: 1.8),
+          border: Border.all(
+            color: _borderColor,
+            width: _isTerminalVisual ? 2 : 1.8,
+          ),
         ),
-        child: Column(
-          children: [_buildHeader(), if (_isExpanded) _buildDetails()],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_isTerminalVisual) _buildTerminalBanner(),
+              _buildHeader(),
+              if (_isExpanded) _buildDetails(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTerminalBanner() {
+    final accent = _borderColor;
+    return Material(
+      color: accent.withValues(alpha: 0.11),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Icon(
+              _isTerminalCancelled
+                  ? Icons.cancel_outlined
+                  : Icons.task_alt_rounded,
+              size: 17,
+              color: accent,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _isTerminalCancelled ? 'Orden cancelada' : 'Orden completada',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w600,
+                  height: 1.25,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -218,7 +299,7 @@ class _OrderCardState extends State<OrderCard> {
               Text(
                 'S/${widget.data.amount.toStringAsFixed(0)}',
                 style: AppTextStyles.subtitle2.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: 2),
@@ -244,26 +325,47 @@ class _OrderCardState extends State<OrderCard> {
                 padding: const EdgeInsets.only(left: 26),
                 child: Text(widget.data.timeAgo, style: AppTextStyles.small),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.textDark, width: 1.2),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  _statusLabel,
-                  style: AppTextStyles.small.copyWith(
-                    color: AppColors.textDark,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
+              _buildStatusPill(),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill() {
+    final accent = _borderColor;
+    if (_isTerminalVisual) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: accent.withValues(alpha: 0.45)),
+        ),
+        child: Text(
+          _statusLabel,
+          style: AppTextStyles.small.copyWith(
+            color: accent.withValues(alpha: 0.95),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.textDark, width: 1.2),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        _statusLabel,
+        style: AppTextStyles.small.copyWith(
+          color: AppColors.textDark,
+          fontSize: 11,
+        ),
       ),
     );
   }

@@ -1,4 +1,4 @@
-/// Estado de la pantalla de permiso de ubicación.
+/// State of the location permission screen.
 sealed class LocationPermissionState {
   const LocationPermissionState();
 }
