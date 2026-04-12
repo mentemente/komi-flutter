@@ -8,6 +8,8 @@ import 'package:komi_fe/core/widgets/seller_bottom_nav.dart';
 import 'package:komi_fe/features/404/not_found_page.dart';
 import 'package:komi_fe/features/auth/login/login_page.dart';
 import 'package:komi_fe/features/auth/register/register_page.dart';
+import 'package:komi_fe/features/buyer/customer_order_detail/customer_order_detail_page.dart';
+import 'package:komi_fe/features/buyer/customer_orders/customer_orders_page.dart';
 import 'package:komi_fe/features/buyer/restaurants/restaurants_page.dart';
 import 'package:komi_fe/features/home/home_page.dart';
 import 'package:komi_fe/features/buyer/location/location_permission_page.dart';
@@ -80,6 +82,21 @@ GoRouter createGoRouter(ProviderContainer container) {
         path: RouteNames.restaurants,
         pageBuilder: (context, state) =>
             _page(key: state.pageKey, child: const RestaurantsPage()),
+      ),
+      GoRoute(
+        path: RouteNames.orders,
+        pageBuilder: (context, state) =>
+            _page(key: state.pageKey, child: const CustomerOrdersPage()),
+      ),
+      GoRoute(
+        path: '${RouteNames.orders}/detalle/:orderId',
+        pageBuilder: (context, state) {
+          final orderId = state.pathParameters['orderId'] ?? '';
+          return _page(
+            key: state.pageKey,
+            child: CustomerOrderDetailPage(orderId: orderId),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.seller,

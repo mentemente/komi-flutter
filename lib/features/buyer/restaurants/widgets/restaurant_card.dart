@@ -34,6 +34,10 @@ class RestaurantCardData {
 
 const String _defaultRestaurantImagePath = 'assets/images/ollin_y_pizarra.webp';
 
+/// Outer border radius of the card; the content is clipped a bit more to not eat the border stroke.
+const double _kCardRadius = 16;
+const double _kCardInnerClipRadius = 14;
+
 class RestaurantCard extends StatelessWidget {
   const RestaurantCard({super.key, required this.data, this.onTap});
 
@@ -46,26 +50,31 @@ class RestaurantCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(_kCardRadius),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(_kCardRadius),
+            border: Border.all(color: AppColors.textDark, width: 2),
             boxShadow: [
               BoxShadow(
                 color: AppColors.textDark.withValues(alpha: 0.08),
-                blurRadius: 8,
+                blurRadius: 10,
                 offset: const Offset(0, 2),
+                spreadRadius: 0,
               ),
             ],
           ),
-          clipBehavior: Clip.antiAlias,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(flex: 3, child: _buildLeftSection()),
-                Expanded(flex: 2, child: _buildRightSection()),
-              ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(_kCardInnerClipRadius),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(flex: 3, child: _buildLeftSection()),
+                  Expanded(flex: 2, child: _buildRightSection()),
+                ],
+              ),
             ),
           ),
         ),
@@ -125,31 +134,32 @@ class RestaurantCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.directions_walk_rounded,
-                            size: 24,
-                            color: data.hasPickup
-                                ? AppColors.textDark
-                                : AppColors.textGray,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Text(
-                              '/',
-                              style: AppTextStyles.small.copyWith(
-                                color: AppColors.textGray,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
+                          if (data.hasPickup)
+                            const Icon(
+                              Icons.directions_walk_rounded,
+                              size: 24,
+                              color: AppColors.textDark,
+                            ),
+                          if (data.hasPickup && data.hasDelivery)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: Text(
+                                '/',
+                                style: AppTextStyles.small.copyWith(
+                                  color: AppColors.textGray,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
-                          ),
-                          Icon(
-                            Icons.electric_moped_rounded,
-                            size: 24,
-                            color: data.hasDelivery
-                                ? AppColors.textDark
-                                : AppColors.textGray,
-                          ),
+                          if (data.hasDelivery)
+                            const Icon(
+                              Icons.electric_moped_rounded,
+                              size: 24,
+                              color: AppColors.textDark,
+                            ),
                         ],
                       ),
                     ),
@@ -207,7 +217,7 @@ class RestaurantCard extends StatelessWidget {
                             Icon(
                               Icons.payments_outlined,
                               size: 24,
-                              color: AppColors.textGray,
+                              color: AppColors.textDark,
                             ),
                         ],
                       ),

@@ -100,7 +100,10 @@ class _RestaurantsPageState extends State<RestaurantsPage> {
             children: [
               _buildHeader(),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 child: Row(
                   children: [
                     Expanded(child: _buildSearchBar()),
@@ -115,7 +118,7 @@ class _RestaurantsPageState extends State<RestaurantsPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: OrderInProgressCard(onTapTracking: () {}),
+                      child: const OrderInProgressCard(),
                     ),
                     for (final card in _exampleCards)
                       Padding(
@@ -148,7 +151,14 @@ class _RestaurantsPageState extends State<RestaurantsPage> {
               ),
             ),
           ),
-          const Expanded(child: Logo(fontSize: 36)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Restaurantes',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     );

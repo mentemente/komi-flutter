@@ -160,7 +160,20 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
             .map(
               (order) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: OrderCard(data: order.toCardData()),
+                child: OrderCard(
+                  data: order.toCardData(),
+                  onStatusChange: (newStatus) async {
+                    final session = ref.read(authSessionProvider);
+                    final storeId = session?.stores.isNotEmpty == true
+                        ? session!.stores.first.id
+                        : '';
+                    await ServiceLocator.ordersService.updateOrderStatus(
+                      orderId: order.id,
+                      status: newStatus,
+                      storeId: storeId,
+                    );
+                  },
+                ),
               ),
             )
             .toList(),

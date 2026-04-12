@@ -6,8 +6,8 @@ class StoreService {
   final HttpClient _client;
 
   static const Map<String, double> testLocation = {
-    'latitude': -12.0454,
-    'longitude': -77.0428,
+    'latitude': -11.978692355120852,
+    'longitude': -77.06727503576046,
   };
 
   Future<Map<String, dynamic>> createStore({

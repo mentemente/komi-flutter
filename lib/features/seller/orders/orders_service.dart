@@ -1,4 +1,5 @@
 import 'package:komi_fe/core/network/http_client.dart';
+import 'package:komi_fe/core/widgets/order_card.dart';
 import 'package:komi_fe/features/seller/orders/orders_model.dart';
 
 class OrdersService {
@@ -23,6 +24,19 @@ class OrdersService {
             .map((e) => SellerOrder.fromJson(e as Map<String, dynamic>))
             .toList();
       },
+    );
+  }
+
+  Future<SellerOrder> updateOrderStatus({
+    required String orderId,
+    required OrderStatus status,
+    required String storeId,
+  }) {
+    return _client.patch<SellerOrder>(
+      '/v1/order/$orderId/status',
+      headers: {'store-id': storeId},
+      body: {'status': status.apiValue},
+      fromJson: SellerOrder.fromJson,
     );
   }
 }
