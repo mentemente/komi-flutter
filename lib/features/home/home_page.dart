@@ -22,15 +22,7 @@ class HomePage extends ConsumerWidget {
         elevation: 0,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(color: AppColors.primary),
-            const SizedBox(height: 16),
-            Text(
-              'Solicitando acceso a ubicación…',
-              style: AppTextStyles.body.copyWith(color: AppColors.textDark),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          children: [const CircularProgressIndicator(color: AppColors.primary)],
         ),
       ),
     );

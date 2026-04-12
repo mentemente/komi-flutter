@@ -84,6 +84,7 @@ class SellerOrder {
 
   OrderCardData toCardData() {
     return OrderCardData(
+      orderId: id,
       customerName: fullName,
       deliveryType: deliveryType,
       paymentMethods: _paymentMethods(),

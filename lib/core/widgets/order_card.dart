@@ -70,6 +70,50 @@ extension OrderStatusBorderColor on OrderStatus {
   }
 }
 
+/// Destination statuses allowed from [current] according to [deliveryType] (transition rules).
+List<OrderStatus> allowedNextOrderStatuses({
+  required DeliveryType deliveryType,
+  required OrderStatus current,
+}) {
+  switch (deliveryType) {
+    case DeliveryType.pickup:
+      switch (current) {
+        case OrderStatus.pending:
+          return [OrderStatus.confirmed, OrderStatus.cancelled];
+        case OrderStatus.confirmed:
+          return [
+            OrderStatus.ready,
+            OrderStatus.completed,
+            OrderStatus.cancelled,
+          ];
+        case OrderStatus.ready:
+          return [OrderStatus.completed, OrderStatus.cancelled];
+        case OrderStatus.delivered:
+        case OrderStatus.completed:
+        case OrderStatus.cancelled:
+          return [];
+      }
+    case DeliveryType.delivery:
+      switch (current) {
+        case OrderStatus.pending:
+          return [OrderStatus.confirmed, OrderStatus.cancelled];
+        case OrderStatus.confirmed:
+          return [
+            OrderStatus.ready,
+            OrderStatus.delivered,
+            OrderStatus.cancelled,
+          ];
+        case OrderStatus.ready:
+          return [OrderStatus.delivered, OrderStatus.cancelled];
+        case OrderStatus.delivered:
+          return [OrderStatus.completed, OrderStatus.cancelled];
+        case OrderStatus.completed:
+        case OrderStatus.cancelled:
+          return [];
+      }
+  }
+}
+
 class OrderDish {
   final String name;
   final int quantity;
@@ -83,6 +127,7 @@ class OrderDish {
 }
 
 class OrderCardData {
+  final String orderId;
   final String customerName;
   final DeliveryType deliveryType;
   final List<String> paymentMethods;
@@ -94,6 +139,7 @@ class OrderCardData {
   final String? notes;
 
   const OrderCardData({
+    required this.orderId,
     required this.customerName,
     required this.deliveryType,
     required this.paymentMethods,
@@ -109,7 +155,12 @@ class OrderCardData {
 class OrderCard extends StatefulWidget {
   final OrderCardData data;
 
-  const OrderCard({super.key, required this.data});
+  /// Called when the user selects a new status from the dialog.
+  /// Should call the API and throw on failure.
+  /// The UI will only update after this completes successfully.
+  final Future<void> Function(OrderStatus newStatus)? onStatusChange;
+
+  const OrderCard({super.key, required this.data, this.onStatusChange});
 
   @override
   State<OrderCard> createState() => _OrderCardState();
@@ -117,6 +168,7 @@ class OrderCard extends StatefulWidget {
 
 class _OrderCardState extends State<OrderCard> {
   bool _isExpanded = false;
+  bool _isUpdating = false;
   late OrderStatus _status;
 
   @override
@@ -146,6 +198,37 @@ class _OrderCardState extends State<OrderCard> {
   }
 
   Future<void> _showStatusDialog() async {
+    final allowed = allowedNextOrderStatuses(
+      deliveryType: widget.data.deliveryType,
+      current: _status,
+    );
+
+    if (allowed.isEmpty) {
+      if (!context.mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text('Estado de la orden', style: AppTextStyles.subtitle2),
+            content: Text(
+              'No hay cambios de estado disponibles para esta orden.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textGray,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cerrar'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    if (!context.mounted) return;
     final selected = await showDialog<OrderStatus>(
       context: context,
       builder: (context) {
@@ -167,7 +250,7 @@ class _OrderCardState extends State<OrderCard> {
                 const SizedBox(height: 8),
                 Divider(color: AppColors.textGray.withValues(alpha: 0.2)),
                 const SizedBox(height: 4),
-                ...OrderStatus.values.map(
+                ...allowed.map(
                   (s) => _StatusOptionTile(
                     label: s.labelEs,
                     value: s,
@@ -182,7 +265,27 @@ class _OrderCardState extends State<OrderCard> {
       },
     );
 
-    if (selected != null && mounted) {
+    if (selected == null || !mounted) return;
+
+    if (widget.onStatusChange != null) {
+      setState(() => _isUpdating = true);
+      try {
+        await widget.onStatusChange!(selected);
+        if (mounted) setState(() => _status = selected);
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'No se pudo actualizar el estado. Intenta de nuevo.',
+              ),
+            ),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isUpdating = false);
+      }
+    } else {
       setState(() => _status = selected);
     }
   }
@@ -302,19 +405,31 @@ class _OrderCardState extends State<OrderCard> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(width: 2),
-              InkWell(
-                onTap: _showStatusDialog,
-                borderRadius: BorderRadius.circular(16),
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(
-                    Icons.more_vert_rounded,
-                    size: 18,
-                    color: AppColors.textGray,
+              if (!_isTerminalVisual) ...[
+                const SizedBox(width: 2),
+                if (_isUpdating)
+                  const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                else
+                  InkWell(
+                    onTap: _showStatusDialog,
+                    borderRadius: BorderRadius.circular(16),
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.more_vert_rounded,
+                        size: 18,
+                        color: AppColors.textGray,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: 6),

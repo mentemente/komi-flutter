@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 
 class OrderInProgressCard extends StatelessWidget {
-  const OrderInProgressCard({super.key, this.onTapTracking});
-
-  final VoidCallback? onTapTracking;
+  const OrderInProgressCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,14 +13,6 @@ class OrderInProgressCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.textDark, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textDark.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
@@ -42,7 +34,7 @@ class OrderInProgressCard extends StatelessWidget {
                   SizedBox(
                     height: 44,
                     child: OutlinedButton(
-                      onPressed: onTapTracking,
+                      onPressed: () => context.go(RouteNames.orders),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textDark,
                         side: const BorderSide(color: AppColors.textDark),
