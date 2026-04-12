@@ -5,6 +5,7 @@ import 'package:komi_fe/features/seller/dishes/food_service.dart';
 import 'package:komi_fe/features/seller/creation/store_service.dart';
 import 'package:komi_fe/features/auth/register/register_service.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_service.dart';
+import 'package:komi_fe/features/seller/orders/orders_service.dart';
 
 abstract final class ServiceLocator {
   ServiceLocator._();
@@ -19,4 +20,5 @@ abstract final class ServiceLocator {
   static final storeService = StoreService(httpClient);
   static final dailyMenuService = DailyMenuService(httpClient);
   static final foodService = FoodService(httpClient);
+  static final ordersService = OrdersService(httpClient);
 }

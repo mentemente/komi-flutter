@@ -1,70 +1,30 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/network/api_exception.dart';
+import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/add_dish_modal.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/pending_dish_card.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
-class PendingDishesBody extends StatefulWidget {
+class PendingDishesBody extends ConsumerStatefulWidget {
   const PendingDishesBody({super.key, this.onSaveToDaily});
 
   final void Function(List<DailyMenuItem> dishes)? onSaveToDaily;
 
   @override
-  State<PendingDishesBody> createState() => _PendingDishesBodyState();
+  ConsumerState<PendingDishesBody> createState() => _PendingDishesBodyState();
 }
 
-class _PendingDishesBodyState extends State<PendingDishesBody> {
+class _PendingDishesBodyState extends ConsumerState<PendingDishesBody> {
   XFile? _photo;
   List<int>? _photoBytes;
   bool _loading = false;
   List<DailyMenuItem> _detectedDishes = [];
-
-  // TODO: remove this
-  static final List<DailyMenuItem> _mockDetected = [
-    DailyMenuItem(
-      name: 'Tequeños',
-      stock: 0,
-      isActive: true,
-      type: MenuItemType.appetizer,
-    ),
-    DailyMenuItem(
-      name: 'Papa a la huancaina',
-      stock: 0,
-      isActive: true,
-      type: MenuItemType.appetizer,
-    ),
-    DailyMenuItem(
-      name: 'Arroz con pollo',
-      price: 12,
-      stock: 15,
-      isActive: true,
-      type: MenuItemType.main_course,
-    ),
-    DailyMenuItem(
-      name: 'Seco de frejoles',
-      price: 13,
-      stock: 12,
-      isActive: true,
-      type: MenuItemType.main_course,
-    ),
-    DailyMenuItem(
-      name: 'Lomo saltado',
-      price: 17,
-      stock: 20,
-      isActive: true,
-      type: MenuItemType.executive_dish,
-    ),
-    DailyMenuItem(
-      name: 'Tallarines verdes con corazon frito',
-      price: 20,
-      stock: 17,
-      isActive: true,
-      type: MenuItemType.executive_dish,
-    ),
-  ];
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -77,13 +37,46 @@ class _PendingDishesBodyState extends State<PendingDishesBody> {
       _loading = true;
       _photo = file;
       _photoBytes = bytes;
+      _detectedDishes = [];
     });
-    await Future<void>.delayed(const Duration(milliseconds: 900));
-    if (mounted) {
+
+    final session = ref.read(authSessionProvider);
+    final stores = session?.stores;
+    final storeId = (stores != null && stores.isNotEmpty)
+        ? stores.first.id
+        : null;
+    if (storeId == null || storeId.isEmpty) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se encontró la tienda.')),
+      );
+      return;
+    }
+
+    try {
+      final detected = await ServiceLocator.foodService.scanFoodsFromImage(
+        storeId: storeId,
+        fileBytes: bytes,
+        filename: file.name,
+      );
+      if (!mounted) return;
       setState(() {
         _loading = false;
-        _detectedDishes = List.from(_mockDetected);
+        _detectedDishes = detected;
       });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.displayMessage)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 

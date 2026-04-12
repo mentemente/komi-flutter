@@ -109,9 +109,6 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
             hintText: 'Buscar',
             prefixIcon: const Icon(Icons.search),
             errorText: _errorText,
-            counterText: _controller.text.isNotEmpty
-                ? '${_controller.text.length}/$_maxLength'
-                : null,
           ),
           style: AppTextStyles.body,
           onSubmitted: (_) => _onSearchPressed(),

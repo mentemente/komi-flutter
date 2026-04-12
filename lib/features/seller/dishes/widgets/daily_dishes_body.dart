@@ -4,6 +4,30 @@ import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/daily_dish_card.dart';
 
+bool _typeRequiresPrice(MenuItemType type) {
+  return type == MenuItemType.main_course ||
+      type == MenuItemType.executive_dish;
+}
+
+String? _publishValidationMessage(List<DailyMenuItem> dishes) {
+  for (final d in dishes) {
+    final name = d.name.trim();
+    if (name.length < 3) {
+      return 'Cada plato debe tener un nombre de al menos 3 caracteres.';
+    }
+    if (d.stock <= 0) {
+      return 'Cada plato debe tener stock mayor a 0.';
+    }
+    if (_typeRequiresPrice(d.type)) {
+      final p = d.price;
+      if (p == null || p.isNaN || p <= 0) {
+        return 'Los platos de segundo y a la carta deben tener un precio mayor a 0.';
+      }
+    }
+  }
+  return null;
+}
+
 class DailyDishesBody extends StatelessWidget {
   const DailyDishesBody({
     super.key,
@@ -117,7 +141,16 @@ class DailyDishesBody extends StatelessWidget {
               child: FilledButton(
                 onPressed: isPublishing || onPublishToday == null
                     ? null
-                    : () => onPublishToday!(),
+                    : () async {
+                        final msg = _publishValidationMessage(dailyDishes);
+                        if (msg != null) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(msg)));
+                          return;
+                        }
+                        await onPublishToday!();
+                      },
                 child: isPublishing
                     ? const SizedBox(
                         height: 22,

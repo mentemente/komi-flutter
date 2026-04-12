@@ -181,7 +181,7 @@ class _CreationPageState extends State<CreationPage> {
       final description = _descriptionController.text.trim().isEmpty
           ? 'Tienda de comida'
           : _descriptionController.text.trim();
-      final imageUrl = (_paymentQrUrl != null && _paymentQrUrl!.isNotEmpty)
+      final paymentQr = (_paymentQrUrl != null && _paymentQrUrl!.isNotEmpty)
           ? _paymentQrUrl!
           : 'https://example.com/logo.png';
 
@@ -196,7 +196,7 @@ class _CreationPageState extends State<CreationPage> {
       final storeData = await ServiceLocator.storeService.createStore(
         name: name,
         description: description,
-        imageUrl: imageUrl,
+        paymentQr: paymentQr,
         schedules: _schedulesPayload(),
         pickupEnabled: pickup,
         deliveryEnabled: delivery,

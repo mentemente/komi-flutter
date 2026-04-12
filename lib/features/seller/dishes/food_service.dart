@@ -36,4 +36,41 @@ class FoodService {
       headers: {'store-id': storeId},
     );
   }
+
+  /// Extract dishes from an image (`POST /v1/food/image-scan`).
+  Future<List<DailyMenuItem>> scanFoodsFromImage({
+    required String storeId,
+    required List<int> fileBytes,
+    required String filename,
+  }) async {
+    final data = await _client.postMultipart(
+      '/v1/food/image-scan',
+      fields: const {},
+      fileFieldName: 'image',
+      fileBytes: fileBytes,
+      filename: filename,
+      headers: {'store-id': storeId},
+    );
+
+    final rawFoods = data['foods'];
+    if (rawFoods is! List) return [];
+
+    return rawFoods
+        .map((e) {
+          final m = Map<String, dynamic>.from(e as Map);
+          final name = m['name'] as String? ?? '';
+          final type = menuItemTypeFromApi(m['type'] as String?);
+          final priceVal = m['price'];
+          final price = priceVal is num ? priceVal.toDouble() : null;
+          return DailyMenuItem(
+            name: name,
+            price: price,
+            stock: 0,
+            isActive: true,
+            type: type,
+          );
+        })
+        .where((d) => d.name.trim().isNotEmpty)
+        .toList();
+  }
 }

@@ -127,9 +127,11 @@ class HttpClient {
     required String fileFieldName,
     required List<int> fileBytes,
     String filename = 'image.jpg',
+    Map<String, String>? headers,
   }) async {
     final uri = Uri.parse('$baseUrl$path');
     final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll({...?headers});
     if (_token != null && _token!.isNotEmpty) {
       request.headers['Authorization'] = 'Bearer $_token';
     }

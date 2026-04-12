@@ -39,15 +39,6 @@ class _LocationPermissionPageState extends State<LocationPermissionPage> {
     super.dispose();
   }
 
-  void _onBack() {
-    final state = _controller.state.value;
-    if (state is LocationPermissionDenied) {
-      _controller.resetToInitial();
-    } else {
-      Navigator.maybePop(context);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<LocationPermissionState>(
@@ -59,7 +50,7 @@ class _LocationPermissionPageState extends State<LocationPermissionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                LocationPermissionHeader(onBack: _onBack),
+                const LocationPermissionHeader(),
                 Expanded(
                   child: Center(
                     child: SingleChildScrollView(

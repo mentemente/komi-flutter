@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
+import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
 import 'package:komi_fe/core/widgets/seller_bottom_nav.dart';
 import 'package:komi_fe/features/404/not_found_page.dart';
 import 'package:komi_fe/features/auth/login/login_page.dart';
@@ -99,10 +101,13 @@ GoRouter createGoRouter(ProviderContainer container) {
               );
 
               return Scaffold(
-                body: child,
-                bottomNavigationBar: SellerBottomNav(
-                  currentIndex: currentIndex,
-                  tabs: tabs,
+                backgroundColor: AppColors.primary,
+                body: SellerMobileShell(
+                  bottomBar: SellerBottomNav(
+                    currentIndex: currentIndex,
+                    tabs: tabs,
+                  ),
+                  child: child,
                 ),
               );
             },

@@ -18,6 +18,10 @@ class PendingDishCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = item.type.cardColor;
+    final showPrice =
+        item.type != MenuItemType.appetizer &&
+        item.type != MenuItemType.beverage &&
+        item.price != null;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -46,13 +50,13 @@ class PendingDishCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (item.price != null) ...[
+                    if (showPrice) ...[
                       const SizedBox(width: 6),
                       Text(
                         'S/${item.price!.toStringAsFixed(0)}',
                         style: AppTextStyles.small.copyWith(
                           color: AppColors.textDark,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
