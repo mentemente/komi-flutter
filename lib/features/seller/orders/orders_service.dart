@@ -31,11 +31,18 @@ class OrdersService {
     required String orderId,
     required OrderStatus status,
     required String storeId,
+    String? cancelledReason,
   }) {
+    final body = <String, dynamic>{'status': status.apiValue};
+    if (status == OrderStatus.cancelled &&
+        cancelledReason != null &&
+        cancelledReason.trim().isNotEmpty) {
+      body['cancelledReason'] = cancelledReason.trim();
+    }
     return _client.patch<SellerOrder>(
       '/v1/order/$orderId/status',
       headers: {'store-id': storeId},
-      body: {'status': status.apiValue},
+      body: body,
       fromJson: SellerOrder.fromJson,
     );
   }

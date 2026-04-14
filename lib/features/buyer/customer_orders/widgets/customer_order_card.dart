@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:komi_fe/core/widgets/order_card.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
-import 'package:komi_fe/core/widgets/order_card.dart';
+import 'package:komi_fe/core/models/payment_condition.dart';
 import 'package:komi_fe/features/buyer/customer_orders/customer_order_progress.dart';
 
 class CustomerOrderCardData {
@@ -167,7 +168,7 @@ class _CustomerOrderPaymentIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final normalized = paymentCondition.trim().toLowerCase();
-    if (normalized == 'prepaid') {
+    if (normalized == OrderPaymentCondition.prepaid) {
       return Image.asset(
         'assets/images/yape_plin.webp',
         height: 24,
@@ -180,7 +181,7 @@ class _CustomerOrderPaymentIcon extends StatelessWidget {
         ),
       );
     }
-    if (normalized == 'cash_on_delivery') {
+    if (normalized == OrderPaymentCondition.cashOnDelivery) {
       return const Icon(
         Icons.payments_outlined,
         size: 22,

@@ -1,31 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/models/payment_condition.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/widgets/order_card.dart' show DeliveryType;
 import 'package:komi_fe/features/buyer/customer_orders/customer_orders_model.dart';
 import 'package:komi_fe/features/buyer/customer_order_detail/widgets/order_detail_card_style.dart';
-
-IconData orderDetailPaymentIcon(String condition) {
-  switch (condition) {
-    case 'prepaid':
-      return Icons.phone_android_rounded;
-    case 'cash_on_delivery':
-      return Icons.payments_outlined;
-    default:
-      return Icons.payment_rounded;
-  }
-}
-
-String orderDetailPaymentLabel(String condition) {
-  switch (condition) {
-    case 'prepaid':
-      return 'Yape / Plin';
-    case 'cash_on_delivery':
-      return 'Contra entrega';
-    default:
-      return condition.isEmpty ? 'Pago' : condition;
-  }
-}
 
 class OrderDetailMetaSection extends StatelessWidget {
   const OrderDetailMetaSection({super.key, required this.order});

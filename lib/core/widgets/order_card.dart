@@ -158,7 +158,11 @@ class OrderCard extends StatefulWidget {
   /// Called when the user selects a new status from the dialog.
   /// Should call the API and throw on failure.
   /// The UI will only update after this completes successfully.
-  final Future<void> Function(OrderStatus newStatus)? onStatusChange;
+  /// [cancelledReason] solo aplica si [newStatus] es [OrderStatus.cancelled].
+  final Future<void> Function(
+    OrderStatus newStatus, {
+    String? cancelledReason,
+  })? onStatusChange;
 
   const OrderCard({super.key, required this.data, this.onStatusChange});
 
@@ -267,10 +271,20 @@ class _OrderCardState extends State<OrderCard> {
 
     if (selected == null || !mounted) return;
 
+    String? cancelledReason;
+    if (selected == OrderStatus.cancelled && widget.onStatusChange != null) {
+      cancelledReason = await _promptCancellationReason();
+      if (!mounted) return;
+      if (cancelledReason == null) return;
+    }
+
     if (widget.onStatusChange != null) {
       setState(() => _isUpdating = true);
       try {
-        await widget.onStatusChange!(selected);
+        await widget.onStatusChange!(
+          selected,
+          cancelledReason: cancelledReason,
+        );
         if (mounted) setState(() => _status = selected);
       } catch (_) {
         if (mounted) {
@@ -288,6 +302,66 @@ class _OrderCardState extends State<OrderCard> {
     } else {
       setState(() => _status = selected);
     }
+  }
+
+  /// Devuelve el motivo o `null` si el usuario cierra sin confirmar.
+  Future<String?> _promptCancellationReason() async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setInner) {
+            return AlertDialog(
+              title: Text(
+                'Motivo de cancelación',
+                style: AppTextStyles.subtitle2,
+              ),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                minLines: 3,
+                maxLines: 6,
+                decoration: InputDecoration(
+                  hintText: 'Indica por qué cancelas la orden',
+                  hintStyle: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textGray,
+                  ),
+                  alignLabelWithHint: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(
+                      color: AppColors.textGray.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+                style: AppTextStyles.bodySmall,
+                onChanged: (_) => setInner(() {}),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Atrás'),
+                ),
+                FilledButton(
+                  onPressed: controller.text.trim().isEmpty
+                      ? null
+                      : () =>
+                          Navigator.of(ctx).pop(controller.text.trim()),
+                  child: const Text('Confirmar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+    controller.dispose();
+    return result;
   }
 
   @override

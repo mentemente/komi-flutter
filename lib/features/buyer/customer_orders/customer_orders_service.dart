@@ -1,3 +1,4 @@
+import 'package:komi_fe/core/network/api_exception.dart';
 import 'package:komi_fe/core/network/http_client.dart';
 import 'package:komi_fe/features/buyer/customer_orders/customer_orders_model.dart';
 
@@ -11,6 +12,13 @@ class CustomerOrdersService {
 
   /// GET [GET /v1/order/buyer](?status=...). Requires buyer session (`Authorization`).
   Future<List<BuyerOrder>> fetchOrders({String? status}) {
+    if (!_client.hasBearerToken) {
+      throw const ApiException(
+        code: 'NO_SESSION',
+        status: 401,
+        message: 'Inicia sesión para ver tus pedidos.',
+      );
+    }
     return _client.get<List<BuyerOrder>>(
       '/v1/order/buyer',
       queryParams: {
@@ -29,6 +37,13 @@ class CustomerOrdersService {
 
   /// GET `/v1/order/buyer/:id` — order detail. Requires buyer session.
   Future<BuyerOrder> fetchOrderById(String orderId) {
+    if (!_client.hasBearerToken) {
+      throw const ApiException(
+        code: 'NO_SESSION',
+        status: 401,
+        message: 'Inicia sesión para ver el detalle del pedido.',
+      );
+    }
     final id = orderId.trim();
     return _client.get<BuyerOrder>(
       '/v1/order/buyer/$id',

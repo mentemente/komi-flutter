@@ -10,6 +10,7 @@ import 'package:komi_fe/features/auth/login/login_page.dart';
 import 'package:komi_fe/features/auth/register/register_page.dart';
 import 'package:komi_fe/features/buyer/customer_order_detail/customer_order_detail_page.dart';
 import 'package:komi_fe/features/buyer/customer_orders/customer_orders_page.dart';
+import 'package:komi_fe/features/buyer/restaurant_detail/restaurant_detail_page.dart';
 import 'package:komi_fe/features/buyer/restaurants/restaurants_page.dart';
 import 'package:komi_fe/features/home/home_page.dart';
 import 'package:komi_fe/features/buyer/location/location_permission_page.dart';
@@ -82,6 +83,20 @@ GoRouter createGoRouter(ProviderContainer container) {
         path: RouteNames.restaurants,
         pageBuilder: (context, state) =>
             _page(key: state.pageKey, child: const RestaurantsPage()),
+      ),
+      GoRoute(
+        path: '${RouteNames.restaurants}/:storeId',
+        pageBuilder: (context, state) {
+          final storeId = state.pathParameters['storeId'] ?? '';
+          final storeName = state.extra as String? ?? '';
+          return _page(
+            key: state.pageKey,
+            child: RestaurantDetailPage(
+              storeId: storeId,
+              storeName: storeName,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: RouteNames.orders,

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:komi_fe/core/widgets/order_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
-import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
-import 'package:komi_fe/core/widgets/order_card.dart';
-import 'package:komi_fe/core/widgets/title_profile_header.dart';
-import 'package:komi_fe/features/seller/orders/orders_controller.dart';
-import 'package:komi_fe/features/seller/orders/orders_state.dart';
-import 'package:komi_fe/features/seller/orders/widgets/orders_active_filters_bar.dart';
-import 'package:komi_fe/features/seller/orders/widgets/orders_filter_sheet.dart';
+import 'package:komi_fe/core/network/service_locator.dart';
+import 'package:komi_fe/core/models/payment_condition.dart';
 import 'package:komi_fe/providers/auth_session_provider.dart';
+import 'package:komi_fe/core/widgets/title_profile_header.dart';
+import 'package:komi_fe/features/seller/orders/orders_state.dart';
+import 'package:komi_fe/features/seller/orders/orders_controller.dart';
+import 'package:komi_fe/features/seller/orders/widgets/orders_filter_sheet.dart';
+import 'package:komi_fe/features/seller/orders/widgets/orders_active_filters_bar.dart';
 
 class OrdersPage extends ConsumerStatefulWidget {
   const OrdersPage({super.key});
@@ -162,7 +163,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: OrderCard(
                   data: order.toCardData(),
-                  onStatusChange: (newStatus) async {
+                  onStatusChange: (newStatus, {cancelledReason}) async {
                     final session = ref.read(authSessionProvider);
                     final storeId = session?.stores.isNotEmpty == true
                         ? session!.stores.first.id
@@ -171,6 +172,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                       orderId: order.id,
                       status: newStatus,
                       storeId: storeId,
+                      cancelledReason: cancelledReason,
                     );
                   },
                 ),
@@ -210,8 +212,10 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
       if (_paymentFilter != null) {
         final condition = order.paymentCondition;
         final matches = switch (_paymentFilter!) {
-          OrdersPaymentFilter.yapePlin => condition == 'prepaid',
-          OrdersPaymentFilter.cash => condition == 'cash_on_delivery',
+          OrdersPaymentFilter.yapePlin =>
+            condition == OrderPaymentCondition.prepaid,
+          OrdersPaymentFilter.cash =>
+            condition == OrderPaymentCondition.cashOnDelivery,
         };
         if (!matches) return false;
       }

@@ -130,7 +130,7 @@ class _OverviewOrdersSectionState extends ConsumerState<OverviewOrdersSection> {
             padding: const EdgeInsets.only(bottom: 10),
             child: OrderCard(
               data: order.toCardData(),
-              onStatusChange: (newStatus) async {
+              onStatusChange: (newStatus, {cancelledReason}) async {
                 final session = ref.read(authSessionProvider);
                 final storeId = session?.stores.isNotEmpty == true
                     ? session!.stores.first.id
@@ -139,6 +139,7 @@ class _OverviewOrdersSectionState extends ConsumerState<OverviewOrdersSection> {
                   orderId: order.id,
                   status: newStatus,
                   storeId: storeId,
+                  cancelledReason: cancelledReason,
                 );
               },
             ),
