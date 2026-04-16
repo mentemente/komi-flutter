@@ -11,13 +11,21 @@ class CustomerOrdersController {
   final ValueNotifier<CustomerOrdersState> state =
       ValueNotifier<CustomerOrdersState>(const CustomerOrdersLoading());
 
+  void setUnauthenticated() {
+    state.value = const CustomerOrdersUnauthenticated();
+  }
+
   Future<void> load({String? status}) async {
     state.value = const CustomerOrdersLoading();
     try {
       final orders = await _service.fetchOrders(status: status);
       state.value = CustomerOrdersReady(orders);
     } on ApiException catch (e) {
-      state.value = CustomerOrdersError(e.displayMessage);
+      if (e.code == 'NO_SESSION') {
+        state.value = const CustomerOrdersUnauthenticated();
+      } else {
+        state.value = CustomerOrdersError(e.displayMessage);
+      }
     } catch (e) {
       state.value = CustomerOrdersError('$e');
     }

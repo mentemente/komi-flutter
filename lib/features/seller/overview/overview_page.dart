@@ -96,7 +96,7 @@ class _OverviewPageState extends ConsumerState<OverviewPage> {
               if (menu is OverviewMenuEmpty)
                 OverviewMenuEmptyState(
                   onUploadTap: () =>
-                      context.go('${RouteNames.seller}${RouteNames.dailyMenu}'),
+                      context.go('${RouteNames.seller}${RouteNames.dishes}'),
                 )
               else ...[
                 const OverviewStatsBar(),

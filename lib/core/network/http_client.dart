@@ -11,6 +11,12 @@ class HttpClient {
 
   void setToken(String? token) => _token = token;
 
+  /// `true` if there is a session token ready to send in `Authorization`.
+  bool get hasBearerToken {
+    final t = _token;
+    return t != null && t.trim().isNotEmpty;
+  }
+
   Map<String, String> get _headers => {
     'Content-Type': 'application/json',
     if (_token != null) 'Authorization': 'Bearer $_token',

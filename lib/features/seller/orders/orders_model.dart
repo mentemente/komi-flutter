@@ -1,4 +1,5 @@
 import 'package:komi_fe/core/widgets/order_card.dart';
+import 'package:komi_fe/core/models/payment_condition.dart';
 
 class SellerOrderItem {
   final String name;
@@ -100,9 +101,9 @@ class SellerOrder {
 
   List<String> _paymentMethods() {
     switch (paymentCondition) {
-      case 'prepaid':
+      case OrderPaymentCondition.prepaid:
         return ['yape_plin'];
-      case 'cash_on_delivery':
+      case OrderPaymentCondition.cashOnDelivery:
         return ['cash'];
       default:
         return [];

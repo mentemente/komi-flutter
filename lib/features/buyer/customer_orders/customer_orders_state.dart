@@ -8,6 +8,11 @@ class CustomerOrdersLoading extends CustomerOrdersState {
   const CustomerOrdersLoading();
 }
 
+/// Without buyer session: no API call to fetch orders.
+class CustomerOrdersUnauthenticated extends CustomerOrdersState {
+  const CustomerOrdersUnauthenticated();
+}
+
 class CustomerOrdersReady extends CustomerOrdersState {
   const CustomerOrdersReady(this.orders);
 

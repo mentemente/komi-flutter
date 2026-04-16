@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 
-/// Datos para mostrar en la card de un restaurante / menú.
 class RestaurantCardData {
   const RestaurantCardData({
     required this.menuTitle,
-    required this.priceRange,
     required this.hasPickup,
     required this.hasDelivery,
     required this.hasYapePlin,
@@ -15,11 +13,12 @@ class RestaurantCardData {
     required this.takeawayPrice,
     required this.dailyItems,
     required this.mainDishes,
+    this.storeId,
     this.imagePath,
+    this.imageUrl,
   });
 
   final String menuTitle;
-  final String priceRange;
   final bool hasPickup;
   final bool hasDelivery;
   final bool hasYapePlin;
@@ -29,7 +28,11 @@ class RestaurantCardData {
   final List<String> dailyItems;
   final List<String> mainDishes;
 
+  final String? storeId;
+
   final String? imagePath;
+
+  final String? imageUrl;
 }
 
 const String _defaultRestaurantImagePath = 'assets/images/ollin_y_pizarra.webp';
@@ -72,7 +75,7 @@ class RestaurantCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(flex: 3, child: _buildLeftSection()),
-                  Expanded(flex: 2, child: _buildRightSection()),
+                  Expanded(flex: 2, child: _buildRightSection(context)),
                 ],
               ),
             ),
@@ -95,14 +98,6 @@ class RestaurantCard extends StatelessWidget {
             style: AppTextStyles.h4.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            data.priceRange,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textDark,
-              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 16),
@@ -232,21 +227,145 @@ class RestaurantCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRightSection() {
-    final imagePath = data.imagePath ?? _defaultRestaurantImagePath;
+  Widget _buildRightSection(BuildContext context) {
+    final netUrl = data.imageUrl;
+    final assetPath = data.imagePath ?? _defaultRestaurantImagePath;
+
     return Container(
       color: AppColors.white,
       constraints: const BoxConstraints(minHeight: 160),
       padding: const EdgeInsets.all(6),
       alignment: Alignment.center,
-      child: Image.asset(
-        imagePath,
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) => Icon(
-          Icons.restaurant_menu_rounded,
-          size: 40,
-          color: AppColors.textGray.withValues(alpha: 0.4),
-        ),
+      child: netUrl != null && netUrl.isNotEmpty
+          ? GestureDetector(
+              onTap: () => _showFullscreenMenuImage(context, netUrl),
+              behavior: HitTestBehavior.opaque,
+              child: Image.network(
+                netUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (_, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (_, _, _) => Icon(
+                  Icons.restaurant_menu_rounded,
+                  size: 40,
+                  color: AppColors.textGray.withValues(alpha: 0.4),
+                ),
+              ),
+            )
+          : Image.asset(
+              assetPath,
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => Icon(
+                Icons.restaurant_menu_rounded,
+                size: 40,
+                color: AppColors.textGray.withValues(alpha: 0.4),
+              ),
+            ),
+    );
+  }
+}
+
+void _showFullscreenMenuImage(BuildContext context, String imageUrl) {
+  showGeneralDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black.withValues(alpha: 0.94),
+    transitionDuration: const Duration(milliseconds: 220),
+    pageBuilder: (dialogContext, animation, secondaryAnimation) {
+      return FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        child: _FullscreenMenuImageView(imageUrl: imageUrl),
+      );
+    },
+  );
+}
+
+class _FullscreenMenuImageView extends StatelessWidget {
+  const _FullscreenMenuImageView({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = MediaQuery.paddingOf(context);
+    final size = MediaQuery.sizeOf(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: padding.top + 4,
+                bottom: padding.bottom + 4,
+                left: 8,
+                right: 8,
+              ),
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 5,
+                clipBehavior: Clip.none,
+                child: Center(
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.contain,
+                    width: size.width - 16,
+                    height: size.height - padding.vertical - 8,
+                    loadingBuilder: (_, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return SizedBox(
+                        height: 120,
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (_, _, _) => Icon(
+                      Icons.broken_image_outlined,
+                      size: 64,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: padding.top + 4,
+            right: 8,
+            child: Material(
+              color: Colors.black45,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: IconButton(
+                icon: const Icon(Icons.close_rounded, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Cerrar',
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

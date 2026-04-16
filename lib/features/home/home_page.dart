@@ -5,9 +5,11 @@ import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/widgets/komi_brand_panel.dart';
+import 'package:komi_fe/core/widgets/logout_button.dart';
 import 'package:komi_fe/core/widgets/responsive_layout.dart';
 import 'package:komi_fe/features/buyer/location/location_flow.dart';
 import 'package:komi_fe/features/home/widgets/home_content.dart';
+import 'package:komi_fe/features/home/widgets/home_top_session_slot.dart';
 import 'package:komi_fe/providers/auth_session_provider.dart';
 
 class HomePage extends ConsumerWidget {
@@ -51,66 +53,50 @@ class HomePage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            ResponsiveLayout(
-              mobile: _buildMobileLayout(context, isGuest),
-              desktop: _buildDesktopLayout(context, isGuest),
-            ),
-            if (isGuest)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: () => context.go(RouteNames.login),
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        textStyle: AppTextStyles.caption,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      ),
-                      onPressed: () => context.go(RouteNames.login),
-                      child: const Text('Iniciar sesión'),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        child: ResponsiveLayout(
+          mobile: _buildMobileLayout(context, isGuest),
+          desktop: _buildDesktopLayout(context, isGuest),
         ),
       ),
+    );
+  }
+
+  Widget _buildLoginBar(BuildContext context, EdgeInsets padding) {
+    return HomeTopSessionSlot(
+      padding: padding,
+      child: TextButton(
+        style: TextButton.styleFrom(
+          textStyle: AppTextStyles.caption,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+        ),
+        onPressed: () => context.go(RouteNames.login),
+        child: const Text('Iniciar sesión'),
+      ),
+    );
+  }
+
+  Widget _buildLogoutBar(EdgeInsets padding) {
+    return HomeTopSessionSlot(
+      padding: padding,
+      child: const LogoutButton(),
     );
   }
 
   Widget _buildMobileLayout(BuildContext context, bool isGuest) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: HomeContent(
-            onSearch: (query) => _onSearch(context, query),
-            onRegisterPressed: () => context.go(RouteNames.register),
-            showGuestCta: isGuest,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopLayout(BuildContext context, bool isGuest) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(child: KomiBrandPanel()),
+        if (isGuest)
+          _buildLoginBar(context, HomeTopSessionSlot.paddingMobile)
+        else
+          _buildLogoutBar(HomeTopSessionSlot.paddingMobile),
         Expanded(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: HomeContent(
@@ -120,6 +106,41 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context, bool isGuest) {
+    return Row(
+      children: [
+        Expanded(child: KomiBrandPanel()),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isGuest)
+                _buildLoginBar(context, HomeTopSessionSlot.paddingDesktop)
+              else
+                _buildLogoutBar(HomeTopSessionSlot.paddingDesktop),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 48),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: HomeContent(
+                        onSearch: (query) => _onSearch(context, query),
+                        onRegisterPressed: () =>
+                            context.go(RouteNames.register),
+                        showGuestCta: isGuest,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

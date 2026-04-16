@@ -11,7 +11,10 @@ abstract final class RouteNames {
   // Buyer routes
   static const String restaurants = '/restaurantes';
 
-  /// Detail of an order for buyer (`/ordenes/detalle/:orderId`).
+  // Detail of a restaurant for buyer (`/restaurantes/:storeId`).
+  static String restaurantDetail(String storeId) => '$restaurants/$storeId';
+
+  // Detail of an order for buyer (`/ordenes/detalle/:orderId`).
   static String buyerOrderDetail(String orderId) => '$orders/detalle/$orderId';
 
   // Seller routes

@@ -1,6 +1,6 @@
 import 'package:komi_fe/core/widgets/order_card.dart';
-import 'package:komi_fe/features/buyer/customer_orders/widgets/customer_order_card.dart';
 import 'package:komi_fe/features/seller/orders/orders_model.dart';
+import 'package:komi_fe/features/buyer/customer_orders/widgets/customer_order_card.dart';
 
 DeliveryType _deliveryTypeFromApi(String? raw) {
   switch (raw) {
@@ -83,7 +83,7 @@ class BuyerOrder {
       id: json['id'] as String? ?? '',
       status: OrderStatus.fromApi(json['status'] as String?),
       deliveryType: _deliveryTypeFromApi(json['deliveryType'] as String?),
-      paymentCondition: json['paymentCondition'] as String? ?? '',
+      paymentCondition: (json['paymentCondition'] as String? ?? '').trim(),
       total: (json['total'] as num?)?.toDouble() ?? 0,
       fullName: json['fullName'] as String? ?? '',
       storeName: json['storeName'] as String? ?? '',
@@ -114,9 +114,7 @@ class BuyerOrder {
   }
 
   CustomerOrderCardData toCardData() {
-    final subtitle = fullName.trim().isNotEmpty
-        ? 'A nombre de: $fullName'
-        : '';
+    final subtitle = fullName.trim().isNotEmpty ? 'A nombre de: $fullName' : '';
     return CustomerOrderCardData(
       orderId: id,
       title: storeName.trim().isNotEmpty ? storeName : 'Restaurante',
