@@ -19,7 +19,7 @@ class OrderDetailStatusCard extends StatelessWidget {
       title: 'Seguimiento',
       initiallyExpanded: true,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 16, 16),
+        padding: const EdgeInsets.fromLTRB(8, 0, 12, 10),
         child: OrderDetailTimeline(
           steps: steps,
           activeIndex: activeIndex,

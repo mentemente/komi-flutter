@@ -45,7 +45,6 @@ class CustomerOrderCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.textDark, width: 2),
         boxShadow: [
           BoxShadow(
             color: AppColors.textDark.withValues(alpha: 0.06),

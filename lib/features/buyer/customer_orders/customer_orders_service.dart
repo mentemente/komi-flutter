@@ -7,11 +7,8 @@ class CustomerOrdersService {
 
   final HttpClient _client;
 
-  /// Default active statuses (orders in progress).
-  static const String defaultStatusQuery = 'pending,ready,delivered,confirmed';
-
-  /// GET [GET /v1/order/buyer](?status=...). Requires buyer session (`Authorization`).
-  Future<List<BuyerOrder>> fetchOrders({String? status}) {
+  /// GET `/v1/order/buyer`. Requires buyer session (`Authorization`).
+  Future<List<BuyerOrder>> fetchOrders() {
     if (!_client.hasBearerToken) {
       throw const ApiException(
         code: 'NO_SESSION',
@@ -21,11 +18,6 @@ class CustomerOrdersService {
     }
     return _client.get<List<BuyerOrder>>(
       '/v1/order/buyer',
-      queryParams: {
-        'status': status?.trim().isNotEmpty == true
-            ? status!.trim()
-            : defaultStatusQuery,
-      },
       fromJson: (data) {
         final raw = data['orders'] as List<dynamic>? ?? [];
         return raw

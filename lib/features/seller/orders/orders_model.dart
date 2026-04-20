@@ -49,6 +49,8 @@ class SellerOrder {
   final String buyerPhone;
   final String? paymentImageUrl;
   final DateTime createdAt;
+  final double? coordLat;
+  final double? coordLng;
 
   const SellerOrder({
     required this.id,
@@ -61,10 +63,13 @@ class SellerOrder {
     required this.buyerPhone,
     this.paymentImageUrl,
     required this.createdAt,
+    this.coordLat,
+    this.coordLng,
   });
 
   factory SellerOrder.fromJson(Map<String, dynamic> json) {
     final rawCombos = json['combos'] as List<dynamic>? ?? [];
+    final coords = json['coordinates'] as Map<String, dynamic>?;
     return SellerOrder(
       id: json['id'] as String? ?? '',
       status: OrderStatus.fromApi(json['status'] as String?),
@@ -80,6 +85,8 @@ class SellerOrder {
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
+      coordLat: (coords?['latitude'] as num?)?.toDouble(),
+      coordLng: (coords?['longitude'] as num?)?.toDouble(),
     );
   }
 
@@ -96,6 +103,10 @@ class SellerOrder {
           ? id.substring(id.length - 8).toUpperCase()
           : id.toUpperCase(),
       dishes: _dishes(),
+      coordLat: coordLat,
+      coordLng: coordLng,
+      paymentImageUrl: paymentImageUrl,
+      createdAt: createdAt,
     );
   }
 

@@ -13,14 +13,7 @@ import 'package:komi_fe/features/buyer/customer_order_detail/widgets/order_detai
 import 'package:komi_fe/features/buyer/customer_order_detail/widgets/order_detail_summary_card.dart';
 import 'package:komi_fe/features/buyer/customer_orders/customer_orders_model.dart';
 
-const List<OrderSummaryLineItem> _kMockOrderLines = [
-  OrderSummaryLineItem(name: 'Arroz con pollo', quantity: 2, price: 24),
-  OrderSummaryLineItem(name: 'Tallarines rojos', quantity: 1, price: 13),
-];
-
-const double _kMockOrderTotal = 40;
-
-/// Order detail: loaded by API; the "Your order" card follows with static data.
+/// Detalle de pedido del comprador (GET `/v1/order/buyer/:id`).
 class CustomerOrderDetailPage extends StatefulWidget {
   const CustomerOrderDetailPage({super.key, required this.orderId});
 
@@ -114,10 +107,7 @@ class _OrderDetailBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 OrderDetailMetaSection(order: order),
-                OrderDetailSummaryCard(
-                  items: _kMockOrderLines,
-                  total: _kMockOrderTotal,
-                ),
+                OrderDetailSummaryCard(order: order),
                 const SizedBox(height: 20),
                 OrderDetailStatusCard(
                   steps: buyerOrderTimelineSteps(order.deliveryType),

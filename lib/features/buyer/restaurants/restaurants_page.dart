@@ -7,15 +7,19 @@ import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/widgets/logout_button.dart';
 import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
+import 'package:komi_fe/features/auth/models/auth_response.dart';
 import 'package:komi_fe/providers/auth_session_provider.dart';
 import 'package:komi_fe/features/buyer/restaurants/restaurants_state.dart';
 import 'package:komi_fe/features/buyer/restaurants/restaurants_controller.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/restaurant_card.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/order_in_progress_card.dart';
+import 'package:komi_fe/features/buyer/restaurants/widgets/no_nearby_stores_view.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/restaurants_filter_sheet.dart';
 
 class RestaurantsPage extends ConsumerStatefulWidget {
-  const RestaurantsPage({super.key});
+  const RestaurantsPage({super.key, this.initialSearchQuery});
+
+  final String? initialSearchQuery;
 
   @override
   ConsumerState<RestaurantsPage> createState() => _RestaurantsPageState();
@@ -32,7 +36,29 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
       restaurantsService: ServiceLocator.restaurantsService,
       locationService: ServiceLocator.locationService,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _controller.load());
+    final initial = widget.initialSearchQuery?.trim() ?? '';
+    if (initial.isNotEmpty) {
+      _searchController.text = initial;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final q = widget.initialSearchQuery?.trim() ?? '';
+      _controller.load(searchText: q.isEmpty ? null : q);
+    });
+  }
+
+  @override
+  void didUpdateWidget(RestaurantsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialSearchQuery != oldWidget.initialSearchQuery) {
+      final q = widget.initialSearchQuery?.trim() ?? '';
+      _searchController.text = q;
+      _controller.load(searchText: q.isEmpty ? null : q);
+    }
+  }
+
+  Future<void> _reloadKeepingSearch() async {
+    final q = _searchController.text.trim();
+    await _controller.load(searchText: q.isEmpty ? null : q);
   }
 
   @override
@@ -99,9 +125,18 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                           color: AppColors.primary,
                         ),
                       ),
+                      RestaurantsNoNearbyStores(:final searchText) =>
+                          NoNearbyStoresView(
+                            searchText: searchText,
+                            onRetry: () => _reloadKeepingSearch(),
+                            onClearSearch: () {
+                              _searchController.clear();
+                              _controller.load(searchText: null);
+                            },
+                          ),
                       RestaurantsError(:final message) => _ErrorView(
                         message: message,
-                        onRetry: _controller.load,
+                        onRetry: () => _reloadKeepingSearch(),
                       ),
                       RestaurantsReady(:final filtered) => _RestaurantsList(
                         cards: filtered,
@@ -142,10 +177,7 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
               style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
-          if (loggedIn) ...[
-            const SizedBox(width: 8),
-            const LogoutButton(),
-          ],
+          if (loggedIn) ...[const SizedBox(width: 8), const LogoutButton()],
         ],
       ),
     );
@@ -214,14 +246,46 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
   }
 }
 
-class _RestaurantsList extends ConsumerWidget {
+class _RestaurantsList extends ConsumerStatefulWidget {
   const _RestaurantsList({required this.cards});
 
   final List<RestaurantCardData> cards;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showOrderBanner = ref.watch(authSessionProvider) != null;
+  ConsumerState<_RestaurantsList> createState() => _RestaurantsListState();
+}
+
+class _RestaurantsListState extends ConsumerState<_RestaurantsList> {
+  bool? _hasOrders;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncOrderBanner());
+  }
+
+  Future<void> _syncOrderBanner() async {
+    if (!mounted) return;
+    if (ref.read(authSessionProvider) == null) {
+      setState(() => _hasOrders = false);
+      return;
+    }
+    try {
+      final orders = await ServiceLocator.customerOrdersService.fetchOrders();
+      if (mounted) setState(() => _hasOrders = orders.isNotEmpty);
+    } catch (_) {
+      if (mounted) setState(() => _hasOrders = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AuthResponse?>(authSessionProvider, (previous, next) {
+      _syncOrderBanner();
+    });
+
+    final cards = widget.cards;
+    final showOrderBanner = _hasOrders == true;
 
     if (cards.isEmpty) {
       return Center(
@@ -257,9 +321,9 @@ class _RestaurantsList extends ConsumerWidget {
             data: card,
             onTap: (card.storeId != null && card.storeId!.isNotEmpty)
                 ? () => context.go(
-                      RouteNames.restaurantDetail(card.storeId!),
-                      extra: card.restaurantName,
-                    )
+                    RouteNames.restaurantDetail(card.storeId!),
+                    extra: card.restaurantName,
+                  )
                 : null,
           ),
         );

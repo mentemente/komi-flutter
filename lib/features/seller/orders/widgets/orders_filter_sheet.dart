@@ -287,7 +287,7 @@ class _OrdersFilterSheetState extends State<OrdersFilterSheet> {
               onTap: (v) => setState(() => _status = v),
             ),
             _StatusChip(
-              label: 'Entregado',
+              label: 'Enviado',
               value: OrdersStatusFilter.delivered,
               groupValue: _status,
               onTap: (v) => setState(() => _status = v),
@@ -439,7 +439,7 @@ extension OrdersStatusFilterBadgeLabel on OrdersStatusFilter {
     OrdersStatusFilter.pending => 'Pendiente',
     OrdersStatusFilter.confirmed => 'Confirmado',
     OrdersStatusFilter.ready => 'Listo',
-    OrdersStatusFilter.delivered => 'Entregado',
+    OrdersStatusFilter.delivered => 'Enviado',
     OrdersStatusFilter.completed => 'Completado',
     OrdersStatusFilter.cancelled => 'Cancelado',
   };

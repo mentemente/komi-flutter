@@ -21,9 +21,7 @@ class DailyDishCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = item.type.cardColor;
-    final showPrice = item.type != MenuItemType.appetizer &&
-        item.type != MenuItemType.beverage &&
-        item.price != null;
+    final showPrice = item.type.isPricedDishCategory && item.price != null;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

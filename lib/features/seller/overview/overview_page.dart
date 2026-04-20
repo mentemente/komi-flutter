@@ -99,8 +99,8 @@ class _OverviewPageState extends ConsumerState<OverviewPage> {
                       context.go('${RouteNames.seller}${RouteNames.dishes}'),
                 )
               else ...[
-                const OverviewStatsBar(),
-                const SizedBox(height: 28),
+                // TODO: Implement stats bar
+                // const OverviewStatsBar(),
                 const OverviewOrdersSection(),
                 const SizedBox(height: 8),
                 OverviewSectionHeader(

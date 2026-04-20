@@ -17,6 +17,16 @@ class RestaurantDetailController {
       final menu = await _service.fetchMenu(storeId);
       state.value = RestaurantDetailReady(menu);
     } on ApiException catch (e) {
+      if (e.code == 'STORE_CLOSED_TODAY') {
+        String? weekdayKey;
+        final d = e.details;
+        if (d is Map) {
+          final w = d['weekday'];
+          if (w is String) weekdayKey = w;
+        }
+        state.value = RestaurantDetailStoreClosedToday(weekdayKey: weekdayKey);
+        return;
+      }
       state.value = RestaurantDetailError(e.displayMessage);
     } catch (e) {
       state.value = RestaurantDetailError('Error al cargar el menú.');

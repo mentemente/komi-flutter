@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum DeliveryType { pickup, delivery }
 
@@ -61,7 +63,7 @@ extension OrderStatusBorderColor on OrderStatus {
       case OrderStatus.ready:
         return 'Listo';
       case OrderStatus.delivered:
-        return 'Entregado';
+        return 'Enviado';
       case OrderStatus.completed:
         return 'Completado';
       case OrderStatus.cancelled:
@@ -137,6 +139,10 @@ class OrderCardData {
   final String? orderNumber;
   final List<OrderDish> dishes;
   final String? notes;
+  final double? coordLat;
+  final double? coordLng;
+  final String? paymentImageUrl;
+  final DateTime? createdAt;
 
   const OrderCardData({
     required this.orderId,
@@ -149,7 +155,27 @@ class OrderCardData {
     this.orderNumber,
     this.dishes = const [],
     this.notes,
+    this.coordLat,
+    this.coordLng,
+    this.paymentImageUrl,
+    this.createdAt,
   });
+
+  String? get googleMapsUrl {
+    if (coordLat == null || coordLng == null) return null;
+    return 'https://www.google.com/maps?q=${coordLat!},${coordLng!}';
+  }
+
+  Color? get urgencyDotColor {
+    if (status == OrderStatus.completed || status == OrderStatus.cancelled) {
+      return null;
+    }
+    if (createdAt == null) return null;
+    final minutes = DateTime.now().difference(createdAt!).inMinutes;
+    if (minutes <= 20) return const Color(0xFF22C55E); // verde
+    if (minutes <= 40) return const Color(0xFFEAB308); // amarillo
+    return const Color(0xFFEF4444); // rojo
+  }
 }
 
 class OrderCard extends StatefulWidget {
@@ -159,10 +185,8 @@ class OrderCard extends StatefulWidget {
   /// Should call the API and throw on failure.
   /// The UI will only update after this completes successfully.
   /// [cancelledReason] solo aplica si [newStatus] es [OrderStatus.cancelled].
-  final Future<void> Function(
-    OrderStatus newStatus, {
-    String? cancelledReason,
-  })? onStatusChange;
+  final Future<void> Function(OrderStatus newStatus, {String? cancelledReason})?
+  onStatusChange;
 
   const OrderCard({super.key, required this.data, this.onStatusChange});
 
@@ -350,8 +374,7 @@ class _OrderCardState extends State<OrderCard> {
                 FilledButton(
                   onPressed: controller.text.trim().isEmpty
                       ? null
-                      : () =>
-                          Navigator.of(ctx).pop(controller.text.trim()),
+                      : () => Navigator.of(ctx).pop(controller.text.trim()),
                   child: const Text('Confirmar'),
                 ),
               ],
@@ -453,6 +476,10 @@ class _OrderCardState extends State<OrderCard> {
                 ),
               ),
               const SizedBox(width: 4),
+              if (widget.data.urgencyDotColor != null) ...[
+                _UrgencyDot(color: widget.data.urgencyDotColor!),
+                const SizedBox(width: 6),
+              ],
               Expanded(
                 child: Text(
                   widget.data.customerName,
@@ -560,6 +587,9 @@ class _OrderCardState extends State<OrderCard> {
   }
 
   Widget _buildDetails() {
+    final mapsUrl = widget.data.googleMapsUrl;
+    final payImg = widget.data.paymentImageUrl;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Column(
@@ -604,8 +634,66 @@ class _OrderCardState extends State<OrderCard> {
               ],
             ],
           ),
+          if (mapsUrl != null || payImg != null) ...[
+            const SizedBox(height: 10),
+            Divider(height: 1, color: Colors.grey.shade200),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                if (mapsUrl != null) ...[
+                  _OutlinedActionButton(
+                    icon: Icons.location_on_outlined,
+                    label: 'Ver Maps',
+                    onTap: () => _openMaps(mapsUrl),
+                  ),
+                  const SizedBox(width: 6),
+                  _OutlinedActionButton(
+                    icon: Icons.copy_rounded,
+                    label: 'Copiar enlace',
+                    onTap: () => _copyUrl(mapsUrl),
+                  ),
+                ],
+                if (payImg != null) ...[
+                  if (mapsUrl != null) const SizedBox(width: 6),
+                  _OutlinedActionButton(
+                    icon: Icons.receipt_long_outlined,
+                    label: 'Ver pago',
+                    onTap: () => _viewPaymentImage(payImg),
+                  ),
+                ],
+              ],
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  Future<void> _openMaps(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir Google Maps.')),
+      );
+    }
+  }
+
+  Future<void> _copyUrl(String url) async {
+    await Clipboard.setData(ClipboardData(text: url));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Enlace copiado al portapapeles.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _viewPaymentImage(String url) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => _FullScreenImageDialog(imageUrl: url),
     );
   }
 
@@ -722,6 +810,140 @@ class _PaymentBadge extends StatelessWidget {
     );
   }
 }
+
+class _UrgencyDot extends StatelessWidget {
+  const _UrgencyDot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.45),
+            blurRadius: 4,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── _OutlinedActionButton ─────────────────────────────────────────────────────
+
+class _OutlinedActionButton extends StatelessWidget {
+  const _OutlinedActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.textGray.withValues(alpha: 0.35)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: AppColors.textDark),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: AppTextStyles.small.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── _FullScreenImageDialog ────────────────────────────────────────────────────
+
+class _FullScreenImageDialog extends StatelessWidget {
+  const _FullScreenImageDialog({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog.fullscreen(
+      backgroundColor: Colors.black,
+      child: Stack(
+        children: [
+          Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 5.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (_, child, progress) {
+                  if (progress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  );
+                },
+                errorBuilder: (_, _, _) => Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white54,
+                      size: 64,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No se pudo cargar la imagen.',
+                      style: const TextStyle(color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 12,
+            right: 12,
+            child: SafeArea(
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black54,
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.close_rounded),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── _StatusOptionTile ─────────────────────────────────────────────────────────
 
 class _StatusOptionTile extends StatelessWidget {
   const _StatusOptionTile({

@@ -11,7 +11,6 @@ const List<String> _suggestions = [
   'Papa a la huancaina',
 ];
 
-const int _minLength = 3;
 const int _maxLength = 50;
 
 final _lettersAndSpacesFormatter = FilteringTextInputFormatter.allow(
@@ -30,12 +29,6 @@ class HomeSearchSection extends StatefulWidget {
 class _HomeSearchSectionState extends State<HomeSearchSection> {
   late final TextEditingController _controller;
   String? _selectedSuggestion;
-  String? _errorText;
-
-  bool get _canSearch {
-    final text = _controller.text.trim();
-    return text.isNotEmpty && text.length >= _minLength;
-  }
 
   @override
   void initState() {
@@ -54,20 +47,12 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
   void _onTextChanged() {
     final text = _controller.text.trim();
     if (_selectedSuggestion != null && text != _selectedSuggestion) {
-      _selectedSuggestion = null;
-    }
-    if (_errorText != null) {
-      setState(() => _errorText = null);
-    } else {
-      setState(() {});
+      setState(() => _selectedSuggestion = null);
     }
   }
 
   void _onSuggestionTap(String text) {
-    setState(() {
-      _selectedSuggestion = text;
-      _errorText = null;
-    });
+    setState(() => _selectedSuggestion = text);
     _controller.text = text;
     _controller.selection = TextSelection(
       baseOffset: 0,
@@ -76,21 +61,7 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
   }
 
   void _onSearchPressed() {
-    final text = _controller.text.trim();
-
-    if (text.isEmpty) {
-      setState(() => _errorText = 'Ingresa un término para buscar');
-      return;
-    }
-    if (text.length < _minLength) {
-      setState(
-        () => _errorText = 'Escribe al menos $_minLength letras para buscar',
-      );
-      return;
-    }
-
-    setState(() => _errorText = null);
-    widget.onSearch?.call(text);
+    widget.onSearch?.call(_controller.text.trim());
   }
 
   @override
@@ -105,10 +76,9 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
             _lettersAndSpacesFormatter,
             LengthLimitingTextInputFormatter(_maxLength),
           ],
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Buscar',
-            prefixIcon: const Icon(Icons.search),
-            errorText: _errorText,
+            prefixIcon: Icon(Icons.search),
           ),
           style: AppTextStyles.body,
           onSubmitted: (_) => _onSearchPressed(),
@@ -132,7 +102,7 @@ class _HomeSearchSectionState extends State<HomeSearchSection> {
         SizedBox(
           height: 48,
           child: FilledButton(
-            onPressed: _canSearch ? _onSearchPressed : null,
+            onPressed: _onSearchPressed,
             child: const Text('Buscar'),
           ),
         ),

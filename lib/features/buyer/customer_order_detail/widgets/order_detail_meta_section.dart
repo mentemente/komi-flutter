@@ -38,39 +38,29 @@ class OrderDetailMetaSection extends StatelessWidget {
 
     if (rows.length == 1) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.only(bottom: 12),
         child: rows.first,
       );
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(kOrderDetailCardOuterRadius),
-          border: Border.all(
-            color: AppColors.textDark,
-            width: kOrderDetailCardBorderWidth,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.textDark.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(kOrderDetailCardInnerRadius),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 for (var i = 0; i < rows.length; i++) ...[
                   rows[i],
-                  if (i < rows.length - 1) const SizedBox(height: 12),
+                  if (i < rows.length - 1) const SizedBox(height: 8),
                 ],
               ],
             ),
@@ -89,8 +79,8 @@ class OrderDetailMetaChipsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 6,
+      runSpacing: 6,
       children: [
         OrderDetailInfoChip(
           icon: order.deliveryType == DeliveryType.pickup
@@ -122,17 +112,17 @@ class OrderDetailInfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.textGray.withValues(alpha: 0.22)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: AppColors.primary),
-          const SizedBox(width: 6),
+          Icon(icon, size: 15, color: AppColors.primary),
+          const SizedBox(width: 5),
           Text(
             label,
             style: AppTextStyles.small.copyWith(
@@ -163,25 +153,30 @@ class OrderDetailMetaLine extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: AppColors.textGray),
+        Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: Icon(icon, size: 16, color: AppColors.textGray),
+        ),
         const SizedBox(width: 8),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTextStyles.small.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textGray,
+          child: Text.rich(
+            TextSpan(
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textDark,
+                height: 1.25,
+              ),
+              children: [
+                TextSpan(
+                  text: '$label: ',
+                  style: AppTextStyles.small.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textGray,
+                    height: 1.25,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: AppTextStyles.bodySmall.copyWith(height: 1.35),
-              ),
-            ],
+                TextSpan(text: value),
+              ],
+            ),
           ),
         ),
       ],
