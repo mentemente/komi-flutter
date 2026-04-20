@@ -17,8 +17,7 @@ class CustomerOrdersPage extends ConsumerStatefulWidget {
   const CustomerOrdersPage({super.key});
 
   @override
-  ConsumerState<CustomerOrdersPage> createState() =>
-      _CustomerOrdersPageState();
+  ConsumerState<CustomerOrdersPage> createState() => _CustomerOrdersPageState();
 }
 
 class _CustomerOrdersPageState extends ConsumerState<CustomerOrdersPage> {
@@ -195,9 +194,7 @@ class _CustomerOrdersPageState extends ConsumerState<CustomerOrdersPage> {
             final order = state.orders[index];
             return CustomerOrderCard(
               data: order.toCardData(),
-              onTap: () => context.push(
-                RouteNames.buyerOrderDetail(order.id),
-              ),
+              onTap: () => context.push(RouteNames.buyerOrderDetail(order.id)),
             );
           },
         ),

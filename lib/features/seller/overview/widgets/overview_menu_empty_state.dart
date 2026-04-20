@@ -14,41 +14,87 @@ class OverviewMenuEmptyState extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onUploadTap,
-            borderRadius: BorderRadius.circular(16),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: AppColors.accentLight,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.textDark, width: 2.5),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 28,
+        DecoratedBox(
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(18)),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onUploadTap,
+              borderRadius: BorderRadius.circular(18),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.accentLight,
+                      AppColors.accentLight.withValues(alpha: 0.78),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: AppColors.textDark.withValues(alpha: 0.08),
+                    width: 1,
+                  ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Sube tu menú del día de hoy',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.subtitle1.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textDark,
-                        height: 1.35,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.55),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.textDark.withValues(alpha: 0.10),
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 30,
+                          color: AppColors.textDark,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Icon(
-                      Icons.add_rounded,
-                      size: 52,
-                      color: AppColors.textDark,
-                    ),
-                  ],
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sube tu menú del día',
+                              style: AppTextStyles.subtitle1.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textDark,
+                                height: 1.25,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Toca para subir una foto',
+                              style: AppTextStyles.body.copyWith(
+                                color: AppColors.textDark.withValues(
+                                  alpha: 0.68,
+                                ),
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.textDark.withValues(alpha: 0.55),
+                        size: 26,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

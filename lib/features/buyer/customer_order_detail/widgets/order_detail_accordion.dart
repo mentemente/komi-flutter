@@ -25,17 +25,6 @@ class OrderDetailAccordion extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(kOrderDetailCardOuterRadius),
-        border: Border.all(
-          color: AppColors.textDark,
-          width: kOrderDetailCardBorderWidth,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textDark.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(kOrderDetailCardInnerRadius),

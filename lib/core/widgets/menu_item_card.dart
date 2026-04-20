@@ -54,6 +54,8 @@ class _MenuItemCardState extends State<MenuItemCard> {
 
   @override
   Widget build(BuildContext context) {
+    final showPrice =
+        widget.item.type.isPricedDishCategory && widget.item.price != null;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -82,7 +84,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                         ),
                       ),
                     ),
-                    if (widget.item.price != null) ...[
+                    if (showPrice) ...[
                       const SizedBox(width: 6),
                       Text(
                         'S/${widget.item.price!.toStringAsFixed(0)}',

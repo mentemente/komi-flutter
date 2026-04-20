@@ -61,13 +61,13 @@ class _TimelineRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 32,
+          width: 28,
           child: Column(
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: isCurrent ? 20 : 18,
-                height: isCurrent ? 20 : 18,
+                width: isCurrent ? 18 : 16,
+                height: isCurrent ? 18 : 16,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isDone ? AppColors.primary : AppColors.white,
@@ -82,8 +82,8 @@ class _TimelineRow extends StatelessWidget {
                   boxShadow: isCurrent
                       ? [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.35),
-                            blurRadius: 8,
+                            color: AppColors.primary.withValues(alpha: 0.28),
+                            blurRadius: 5,
                             spreadRadius: 0,
                           ),
                         ]
@@ -93,16 +93,16 @@ class _TimelineRow extends StatelessWidget {
                 child: isDone
                     ? const Icon(
                         Icons.check_rounded,
-                        size: 12,
+                        size: 11,
                         color: AppColors.white,
                       )
                     : null,
               ),
               if (!isLast)
                 Container(
-                  width: 2.5,
-                  height: 48,
-                  margin: const EdgeInsets.symmetric(vertical: 3),
+                  width: 2,
+                  height: 32,
+                  margin: const EdgeInsets.symmetric(vertical: 2),
                   decoration: BoxDecoration(
                     color: lineColor,
                     borderRadius: BorderRadius.circular(2),
@@ -111,16 +111,16 @@ class _TimelineRow extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Expanded(
           child: Padding(
-            padding: EdgeInsets.only(bottom: isLast ? 0 : 14),
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 8),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: isCurrent
                     ? AppColors.primary.withValues(alpha: 0.08)
                     : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 border: isCurrent
                     ? Border.all(
                         color: AppColors.primary.withValues(alpha: 0.22),
@@ -129,16 +129,18 @@ class _TimelineRow extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
+                  horizontal: 10,
+                  vertical: 6,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       step.title,
                       style: AppTextStyles.subtitle2.copyWith(
                         fontWeight: FontWeight.w700,
+                        height: 1.2,
                         color: isCurrent
                             ? AppColors.textDark
                             : (isDone
@@ -146,11 +148,11 @@ class _TimelineRow extends StatelessWidget {
                                   : AppColors.textGray),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       step.subtitle,
                       style: AppTextStyles.caption.copyWith(
-                        height: 1.4,
+                        height: 1.25,
                         color: isCurrent
                             ? AppColors.textGray
                             : AppColors.textGray.withValues(alpha: 0.9),

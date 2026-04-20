@@ -95,7 +95,7 @@ class MobileViewportContainer extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: panelColor,
-                border: Border.all(color: Colors.black, width: 1.2),
+                border: Border.all(color: AppColors.accentLight, width: 1),
               ),
               clipBehavior: Clip.antiAlias,
               child: boxed,

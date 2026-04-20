@@ -15,10 +15,10 @@ class CustomerOrdersController {
     state.value = const CustomerOrdersUnauthenticated();
   }
 
-  Future<void> load({String? status}) async {
+  Future<void> load() async {
     state.value = const CustomerOrdersLoading();
     try {
-      final orders = await _service.fetchOrders(status: status);
+      final orders = await _service.fetchOrders();
       state.value = CustomerOrdersReady(orders);
     } on ApiException catch (e) {
       if (e.code == 'NO_SESSION') {

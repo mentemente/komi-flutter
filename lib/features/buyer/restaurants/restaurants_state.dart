@@ -10,6 +10,12 @@ class RestaurantsLoading extends RestaurantsState {
   const RestaurantsLoading();
 }
 
+class RestaurantsNoNearbyStores extends RestaurantsState {
+  const RestaurantsNoNearbyStores({this.searchText});
+
+  final String? searchText;
+}
+
 class RestaurantsReady extends RestaurantsState {
   const RestaurantsReady({
     required this.stores,

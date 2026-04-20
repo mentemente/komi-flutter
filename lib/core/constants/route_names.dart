@@ -9,6 +9,7 @@ abstract final class RouteNames {
   static const String locationPermission = '/ubicacion';
 
   // Buyer routes
+  static const String checkout = '/checkout';
   static const String restaurants = '/restaurantes';
 
   // Detail of a restaurant for buyer (`/restaurantes/:storeId`).

@@ -15,17 +15,22 @@ DeliveryType _deliveryTypeFromApi(String? raw) {
 String _formatOrderDateTime(DateTime at) {
   final local = at.toLocal();
   final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final day = DateTime(local.year, local.month, local.day);
-  final h = local.hour;
-  final m = local.minute;
-  final period = h >= 12 ? 'PM' : 'AM';
-  final h12 = h % 12 == 0 ? 12 : h % 12;
-  final hm = '$h12:${m.toString().padLeft(2, '0')} $period';
-  if (day == today) return 'Hoy, $hm';
-  final yesterday = today.subtract(const Duration(days: 1));
-  if (day == yesterday) return 'Ayer, $hm';
-  return '${local.day}/${local.month}/${local.year}, $hm';
+  var diff = now.difference(local);
+  if (diff.isNegative) diff = Duration.zero;
+
+  final minutes = diff.inMinutes;
+  if (minutes < 60) {
+    final m = minutes <= 0 ? 1 : minutes;
+    return 'Hace $m min';
+  }
+
+  final hours = diff.inHours;
+  if (hours < 24) {
+    return hours == 1 ? 'Hace 1 hora' : 'Hace $hours horas';
+  }
+
+  final days = diff.inDays;
+  return days == 1 ? 'Hace 1 día' : 'Hace $days días';
 }
 
 class BuyerOrder {
@@ -125,5 +130,25 @@ class BuyerOrder {
       dateTimeLabel: _formatOrderDateTime(createdAt),
       priceLabel: 's/${total.toStringAsFixed(0)}',
     );
+  }
+}
+
+extension BuyerOrderPricing on BuyerOrder {
+  double get combosItemsSubtotal {
+    var sum = 0.0;
+    for (final combo in combos) {
+      for (final item in combo.items) {
+        sum += item.price;
+      }
+    }
+    return sum;
+  }
+
+  double? get inferredDeliveryFee {
+    if (deliveryType != DeliveryType.delivery) return null;
+    final sub = combosItemsSubtotal;
+    final diff = total - sub;
+    if (diff < -0.05) return null;
+    return diff < 0 ? 0.0 : diff;
   }
 }

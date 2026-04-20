@@ -1,6 +1,7 @@
 import 'package:komi_fe/core/network/http_client.dart';
 import 'package:komi_fe/core/network/upload_service.dart';
 import 'package:komi_fe/features/auth/login/login_service.dart';
+import 'package:komi_fe/features/buyer/checkout/order_service.dart';
 import 'package:komi_fe/features/seller/dishes/food_service.dart';
 import 'package:komi_fe/features/seller/creation/store_service.dart';
 import 'package:komi_fe/features/auth/register/register_service.dart';
@@ -19,6 +20,7 @@ abstract final class ServiceLocator {
   );
 
   static final locationService = LocationService();
+  static final orderService = OrderService(httpClient);
   static final foodService = FoodService(httpClient);
   static final storeService = StoreService(httpClient);
   static final loginService = LoginService(httpClient);

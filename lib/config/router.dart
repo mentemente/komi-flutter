@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:komi_fe/features/home/home_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
-import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
-import 'package:komi_fe/core/widgets/seller_bottom_nav.dart';
 import 'package:komi_fe/features/404/not_found_page.dart';
 import 'package:komi_fe/features/auth/login/login_page.dart';
+import 'package:komi_fe/core/widgets/seller_bottom_nav.dart';
+import 'package:komi_fe/features/auth/models/user_type.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
+import 'package:komi_fe/features/seller/orders/orders_page.dart';
+import 'package:komi_fe/features/seller/dishes/dishes_page.dart';
 import 'package:komi_fe/features/auth/register/register_page.dart';
-import 'package:komi_fe/features/buyer/customer_order_detail/customer_order_detail_page.dart';
-import 'package:komi_fe/features/buyer/customer_orders/customer_orders_page.dart';
-import 'package:komi_fe/features/buyer/restaurant_detail/restaurant_detail_page.dart';
-import 'package:komi_fe/features/buyer/restaurants/restaurants_page.dart';
-import 'package:komi_fe/features/home/home_page.dart';
-import 'package:komi_fe/features/buyer/location/location_permission_page.dart';
+import 'package:komi_fe/features/buyer/checkout/checkout_page.dart';
+import 'package:komi_fe/features/seller/overview/overview_page.dart';
+import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
 import 'package:komi_fe/features/seller/creation/creation_page.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_page.dart';
-import 'package:komi_fe/features/seller/dishes/dishes_page.dart';
-import 'package:komi_fe/features/seller/orders/orders_page.dart';
-import 'package:komi_fe/features/auth/models/user_type.dart';
-import 'package:komi_fe/features/seller/overview/overview_page.dart';
-import 'package:komi_fe/providers/auth_session_provider.dart';
+import 'package:komi_fe/features/buyer/restaurants/restaurants_page.dart';
+import 'package:komi_fe/features/buyer/location/location_permission_page.dart';
+import 'package:komi_fe/features/buyer/customer_orders/customer_orders_page.dart';
+import 'package:komi_fe/features/buyer/restaurant_detail/restaurant_detail_page.dart';
+import 'package:komi_fe/features/buyer/customer_order_detail/customer_order_detail_page.dart';
 
 String? _sellerBranchRedirect(
   GoRouterState state,
@@ -81,8 +82,15 @@ GoRouter createGoRouter(ProviderContainer container) {
       ),
       GoRoute(
         path: RouteNames.restaurants,
-        pageBuilder: (context, state) =>
-            _page(key: state.pageKey, child: const RestaurantsPage()),
+        pageBuilder: (context, state) {
+          final q = state.uri.queryParameters['q'];
+          return _page(
+            key: state.pageKey,
+            child: RestaurantsPage(
+              initialSearchQuery: q != null && q.isNotEmpty ? q : null,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '${RouteNames.restaurants}/:storeId',
@@ -91,12 +99,14 @@ GoRouter createGoRouter(ProviderContainer container) {
           final storeName = state.extra as String? ?? '';
           return _page(
             key: state.pageKey,
-            child: RestaurantDetailPage(
-              storeId: storeId,
-              storeName: storeName,
-            ),
+            child: RestaurantDetailPage(storeId: storeId, storeName: storeName),
           );
         },
+      ),
+      GoRoute(
+        path: RouteNames.checkout,
+        pageBuilder: (context, state) =>
+            _page(key: state.pageKey, child: const CheckoutPage()),
       ),
       GoRoute(
         path: RouteNames.orders,

@@ -40,7 +40,14 @@ class HomePage extends ConsumerWidget {
     if (!context.mounted) return;
 
     if (ok) {
-      context.go(RouteNames.restaurants);
+      final q = query.trim();
+      final path = q.isEmpty
+          ? RouteNames.restaurants
+          : Uri(
+              path: RouteNames.restaurants,
+              queryParameters: {'q': q},
+            ).toString();
+      context.go(path);
     } else {
       context.go(RouteNames.locationPermission);
     }

@@ -48,6 +48,8 @@ class StoreMenuInfo {
     required this.schedule,
     required this.pickupEnabled,
     required this.deliveryEnabled,
+    required this.deliveryCost,
+    required this.paymentQr,
   });
 
   final String name;
@@ -55,6 +57,8 @@ class StoreMenuInfo {
   final StoreMenuSchedule schedule;
   final bool pickupEnabled;
   final bool deliveryEnabled;
+  final double deliveryCost;
+  final String paymentQr;
 
   factory StoreMenuInfo.fromJson(Map<String, dynamic> json) => StoreMenuInfo(
         name: json['name'] as String? ?? '',
@@ -64,6 +68,8 @@ class StoreMenuInfo {
         ),
         pickupEnabled: json['pickupEnabled'] as bool? ?? false,
         deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
+        deliveryCost: (json['deliveryCost'] as num?)?.toDouble() ?? 0.0,
+        paymentQr: json['paymentQr'] as String? ?? '',
       );
 }
 

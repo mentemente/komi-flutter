@@ -22,7 +22,10 @@ class OrdersController {
     state.value = const OrdersLoading();
 
     try {
-      final orders = await _service.fetchOrders(storeId: storeId, status: status);
+      final orders = await _service.fetchOrders(
+        storeId: storeId,
+        status: status,
+      );
       state.value = OrdersReady(orders);
     } on ApiException catch (e) {
       state.value = OrdersError(e.displayMessage);

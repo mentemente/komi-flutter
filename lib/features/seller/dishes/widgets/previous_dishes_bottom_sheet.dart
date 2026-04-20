@@ -13,6 +13,8 @@ String _menuTypeCategoryLabel(MenuItemType t) {
       return 'Entrada';
     case MenuItemType.beverage:
       return 'Bebida';
+    case MenuItemType.dessert:
+      return 'Postre';
     case MenuItemType.main_course:
       return 'Menú';
     case MenuItemType.executive_dish:

@@ -58,7 +58,6 @@ class RestaurantCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(_kCardRadius),
-            border: Border.all(color: AppColors.textDark, width: 2),
             boxShadow: [
               BoxShadow(
                 color: AppColors.textDark.withValues(alpha: 0.08),
@@ -101,126 +100,123 @@ class RestaurantCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 16,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Recojo',
-                          style: AppTextStyles.overline.copyWith(
-                            color: AppColors.textGray,
-                            fontSize: 12,
-                          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 16,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Recojo',
+                        style: AppTextStyles.overline.copyWith(
+                          color: AppColors.textGray,
+                          fontSize: 12,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    SizedBox(
-                      height: 36,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          if (data.hasPickup)
-                            const Icon(
-                              Icons.directions_walk_rounded,
-                              size: 24,
-                              color: AppColors.textDark,
-                            ),
-                          if (data.hasPickup && data.hasDelivery)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                              ),
-                              child: Text(
-                                '/',
-                                style: AppTextStyles.small.copyWith(
-                                  color: AppColors.textGray,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          if (data.hasDelivery)
-                            const Icon(
-                              Icons.electric_moped_rounded,
-                              size: 24,
-                              color: AppColors.textDark,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 16,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Pago',
-                          style: AppTextStyles.overline.copyWith(
-                            color: AppColors.textGray,
-                            fontSize: 12,
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    height: 40,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (data.hasPickup)
+                          const Icon(
+                            Icons.directions_walk_rounded,
+                            size: 28,
+                            color: AppColors.textDark,
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    SizedBox(
-                      height: 36,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          if (data.hasYapePlin)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 4),
-                              child: Image.asset(
-                                'assets/images/yape_plin.webp',
-                                height: 24,
-                                width: 56,
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, _, _) => Icon(
-                                  Icons.phone_android,
-                                  size: 28,
-                                  color: AppColors.textGray,
-                                ),
-                              ),
-                            ),
-                          if (data.hasYapePlin && data.hasCash)
-                            Text(
-                              ' / ',
+                        if (data.hasPickup && data.hasDelivery)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              '/',
                               style: AppTextStyles.small.copyWith(
                                 color: AppColors.textGray,
+                                fontWeight: FontWeight.w500,
                                 fontSize: 12,
                               ),
                             ),
-                          if (data.hasCash)
-                            Icon(
-                              Icons.payments_outlined,
-                              size: 24,
-                              color: AppColors.textDark,
-                            ),
-                        ],
+                          ),
+                        if (data.hasDelivery)
+                          const Icon(
+                            Icons.electric_moped_rounded,
+                            size: 28,
+                            color: AppColors.textDark,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 16,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Pago',
+                        style: AppTextStyles.overline.copyWith(
+                          color: AppColors.textGray,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    height: 40,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (data.hasYapePlin)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Image.asset(
+                              'assets/images/yape_plin.webp',
+                              height: 28,
+                              width: 65,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, _, _) => Icon(
+                                Icons.phone_android,
+                                size: 32,
+                                color: AppColors.textGray,
+                              ),
+                            ),
+                          ),
+                        if (data.hasYapePlin && data.hasCash)
+                          Text(
+                            ' / ',
+                            style: AppTextStyles.small.copyWith(
+                              color: AppColors.textGray,
+                              fontSize: 12,
+                            ),
+                          ),
+                        if (data.hasCash)
+                          Icon(
+                            Icons.payments_outlined,
+                            size: 28,
+                            color: AppColors.textDark,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

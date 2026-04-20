@@ -4,9 +4,7 @@ import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 
-bool _typeRequiresPrice(MenuItemType type) {
-  return type != MenuItemType.appetizer && type != MenuItemType.beverage;
-}
+bool _typeRequiresPrice(MenuItemType type) => type.isPricedDishCategory;
 
 class AddDishModal extends StatefulWidget {
   const AddDishModal({super.key, this.onCreated});
@@ -145,6 +143,10 @@ class _AddDishModalState extends State<AddDishModal> {
                 DropdownMenuItem(
                   value: MenuItemType.beverage,
                   child: Text('Bebida'),
+                ),
+                DropdownMenuItem(
+                  value: MenuItemType.dessert,
+                  child: Text('Postre'),
                 ),
                 DropdownMenuItem(
                   value: MenuItemType.main_course,
@@ -368,6 +370,10 @@ class _EditDishModalState extends State<EditDishModal> {
                 DropdownMenuItem(
                   value: MenuItemType.beverage,
                   child: Text('Bebida'),
+                ),
+                DropdownMenuItem(
+                  value: MenuItemType.dessert,
+                  child: Text('Postre'),
                 ),
                 DropdownMenuItem(
                   value: MenuItemType.main_course,

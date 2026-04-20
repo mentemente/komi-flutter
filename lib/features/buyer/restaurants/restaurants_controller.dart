@@ -22,13 +22,14 @@ class RestaurantsController {
 
   List<NearbyStore> _allStores = [];
 
-  Future<void> load() async {
+  Future<void> load({String? searchText}) async {
     state.value = const RestaurantsLoading();
     try {
       final position = await _locationService.getCurrentPosition();
       final stores = await _restaurantsService.fetchNearby(
         latitude: position.latitude,
         longitude: position.longitude,
+        searchText: searchText,
       );
       _allStores = stores;
       state.value = RestaurantsReady(
@@ -36,6 +37,10 @@ class RestaurantsController {
         filtered: stores.map((s) => s.toCardData()).toList(),
       );
     } on ApiException catch (e) {
+      if (e.code == 'NO_NEARBY_STORES') {
+        state.value = RestaurantsNoNearbyStores(searchText: searchText);
+        return;
+      }
       state.value = RestaurantsError(e.displayMessage);
     } catch (e) {
       state.value = RestaurantsError('$e');

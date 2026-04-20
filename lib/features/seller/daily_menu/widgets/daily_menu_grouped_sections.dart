@@ -41,6 +41,7 @@ class DailyMenuGroupedSections extends StatelessWidget {
 
     add('Entradas', _byType(MenuItemType.appetizer));
     add('Bebidas', _byType(MenuItemType.beverage));
+    add('Postres', _byType(MenuItemType.dessert));
     add('Menus', _byType(MenuItemType.main_course));
     add('Platos a la carta', _byType(MenuItemType.executive_dish));
 
