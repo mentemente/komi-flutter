@@ -15,6 +15,7 @@ import 'package:komi_fe/features/buyer/restaurants/widgets/restaurant_card.dart'
 import 'package:komi_fe/features/buyer/restaurants/widgets/order_in_progress_card.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/no_nearby_stores_view.dart';
 import 'package:komi_fe/features/buyer/restaurants/widgets/restaurants_filter_sheet.dart';
+import 'package:komi_fe/features/buyer/restaurants/widgets/restaurants_active_filters_bar.dart';
 
 class RestaurantsPage extends ConsumerStatefulWidget {
   const RestaurantsPage({super.key, this.initialSearchQuery});
@@ -69,7 +70,7 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
   }
 
   void _onSearchChanged(String value) {
-    _controller.applySearch(value);
+    _controller.scheduleDebouncedNearbySearch(value);
   }
 
   void _openFilterSheet(RestaurantsReady current) {
@@ -98,18 +99,39 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
               ValueListenableBuilder<RestaurantsState>(
                 valueListenable: _controller.state,
                 builder: (context, state, _) {
+                  final ready = state is RestaurantsReady ? state : null;
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 16,
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(child: _buildSearchBar()),
-                        const SizedBox(width: 12),
-                        _buildFilterButton(
-                          state is RestaurantsReady ? state : null,
+                        Row(
+                          children: [
+                            Expanded(child: _buildSearchBar()),
+                            const SizedBox(width: 12),
+                            _buildFilterButton(ready),
+                          ],
                         ),
+                        if (ready != null)
+                          RestaurantsActiveFiltersBar(
+                            payment: ready.paymentFilter,
+                            delivery: ready.deliveryFilter,
+                            onRemovePayment: () => _controller.applyFilters(
+                              payment: null,
+                              delivery: ready.deliveryFilter,
+                            ),
+                            onRemoveDelivery: () => _controller.applyFilters(
+                              payment: ready.paymentFilter,
+                              delivery: null,
+                            ),
+                            onClearAll: () => _controller.applyFilters(
+                              payment: null,
+                              delivery: null,
+                            ),
+                          ),
                       ],
                     ),
                   );
@@ -126,14 +148,14 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
                         ),
                       ),
                       RestaurantsNoNearbyStores(:final searchText) =>
-                          NoNearbyStoresView(
-                            searchText: searchText,
-                            onRetry: () => _reloadKeepingSearch(),
-                            onClearSearch: () {
-                              _searchController.clear();
-                              _controller.load(searchText: null);
-                            },
-                          ),
+                        NoNearbyStoresView(
+                          searchText: searchText,
+                          onRetry: () => _reloadKeepingSearch(),
+                          onClearSearch: () {
+                            _searchController.clear();
+                            _controller.load(searchText: null);
+                          },
+                        ),
                       RestaurantsError(:final message) => _ErrorView(
                         message: message,
                         onRetry: () => _reloadKeepingSearch(),
@@ -184,28 +206,47 @@ class _RestaurantsPageState extends ConsumerState<RestaurantsPage> {
   }
 
   Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      onChanged: _onSearchChanged,
-      decoration: InputDecoration(
-        hintText: 'Buscar',
-        hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.textGray),
-        prefixIcon: Icon(
-          Icons.search_rounded,
-          color: AppColors.textGray,
-          size: 22,
-        ),
-        filled: true,
-        fillColor: AppColors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller.searchInProgress,
+      builder: (context, busy, _) {
+        return TextField(
+          controller: _searchController,
+          onChanged: _onSearchChanged,
+          decoration: InputDecoration(
+            hintText: '¿Qué vas a comer?',
+            hintStyle:
+                AppTextStyles.bodySmall.copyWith(color: AppColors.textGray),
+            prefixIcon: Icon(
+              Icons.search_rounded,
+              color: AppColors.textGray,
+              size: 22,
+            ),
+            suffixIcon: busy
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  )
+                : null,
+            filled: true,
+            fillColor: AppColors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        );
+      },
     );
   }
 

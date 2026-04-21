@@ -38,7 +38,6 @@ extension MenuItemTypeColor on MenuItemType {
   }
 }
 
-/// Solo plato de fondo y a la carta tienen precio; acompañantes (entrada/bebida/postre) no.
 extension MenuItemTypePricing on MenuItemType {
   bool get isPricedDishCategory =>
       this == MenuItemType.main_course || this == MenuItemType.executive_dish;

@@ -13,7 +13,6 @@ import 'package:komi_fe/features/buyer/customer_order_detail/widgets/order_detai
 import 'package:komi_fe/features/buyer/customer_order_detail/widgets/order_detail_summary_card.dart';
 import 'package:komi_fe/features/buyer/customer_orders/customer_orders_model.dart';
 
-/// Detalle de pedido del comprador (GET `/v1/order/buyer/:id`).
 class CustomerOrderDetailPage extends StatefulWidget {
   const CustomerOrderDetailPage({super.key, required this.orderId});
 

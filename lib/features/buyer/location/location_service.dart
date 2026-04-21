@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
-/// Servicio de ubicación (Geolocator). Sin lógica de UI.
 class LocationService {
   Future<bool> isLocationServiceEnabled() async {
     final enabled = await Geolocator.isLocationServiceEnabled();
@@ -26,7 +25,9 @@ class LocationService {
       debugPrint('[LocationService] latitud: ${position.latitude}');
       debugPrint('[LocationService] longitud: ${position.longitude}');
       debugPrint('[LocationService] altitud (m): ${position.altitude}');
-      debugPrint('[LocationService] precisión horizontal (m): ${position.accuracy}');
+      debugPrint(
+        '[LocationService] precisión horizontal (m): ${position.accuracy}',
+      );
     }
     return position;
   }

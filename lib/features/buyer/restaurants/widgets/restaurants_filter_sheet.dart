@@ -295,3 +295,17 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
+
+extension RestaurantPaymentFilterBadgeLabel on RestaurantPaymentFilter {
+  String get badgeLabel => switch (this) {
+    RestaurantPaymentFilter.yapePlin => 'Yape/Plin',
+    RestaurantPaymentFilter.cash => 'Efectivo',
+  };
+}
+
+extension RestaurantDeliveryFilterBadgeLabel on RestaurantDeliveryFilter {
+  String get badgeLabel => switch (this) {
+    RestaurantDeliveryFilter.pickup => 'Para recoger',
+    RestaurantDeliveryFilter.delivery => 'Delivery',
+  };
+}

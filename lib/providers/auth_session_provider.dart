@@ -25,7 +25,7 @@ class AuthSessionNotifier extends Notifier<AuthResponse?> {
   @override
   AuthResponse? build() => null;
 
-  /// Carga token y usuario desde almacenamiento local y sincroniza [HttpClient].
+  /// Load token and user from local storage and sync with [HttpClient].
   Future<void> hydrate() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_kToken);
@@ -53,7 +53,7 @@ class AuthSessionNotifier extends Notifier<AuthResponse?> {
     }
   }
 
-  /// Fusiona en disco (`komi_auth_user_payload`) la tienda devuelta en `data` tras `POST /v1/store`.
+  /// Merge the store returned in `data` after `POST /v1/store` into local storage (`komi_auth_user_payload`).
   Future<void> addStoreFromApiData(Map<String, dynamic> storeData) async {
     final id = storeData['id'] as String?;
     final storeName = storeData['name'] as String?;

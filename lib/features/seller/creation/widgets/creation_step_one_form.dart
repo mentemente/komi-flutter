@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:komi_fe/core/theme/app_text_styles.dart';
+import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/features/seller/creation/widgets/creation_header.dart';
 import 'package:komi_fe/features/seller/creation/widgets/general_info_section.dart';
 import 'package:komi_fe/features/seller/creation/widgets/schedule_section.dart';
+import 'package:komi_fe/features/seller/creation/places_service.dart';
 
 class CreationStepOneForm extends StatelessWidget {
   const CreationStepOneForm({
@@ -13,6 +16,7 @@ class CreationStepOneForm extends StatelessWidget {
     required this.addressController,
     required this.referenceController,
     required this.descriptionController,
+    required this.onLocationSelected,
     required this.scheduleMode,
     required this.onScheduleModeChanged,
     required this.allDaysOpen,
@@ -26,6 +30,7 @@ class CreationStepOneForm extends StatelessWidget {
     required this.onDayOpenTap,
     required this.onDayCloseTap,
     required this.onNext,
+    this.googleApiKey,
   });
 
   final GlobalKey<FormState> formKey;
@@ -36,6 +41,8 @@ class CreationStepOneForm extends StatelessWidget {
   final TextEditingController addressController;
   final TextEditingController referenceController;
   final TextEditingController descriptionController;
+  final Function(LocationCoordinates) onLocationSelected;
+  final String? googleApiKey;
 
   final ScheduleMode scheduleMode;
   final ValueChanged<ScheduleMode> onScheduleModeChanged;
@@ -66,6 +73,8 @@ class CreationStepOneForm extends StatelessWidget {
             addressController: addressController,
             referenceController: referenceController,
             descriptionController: descriptionController,
+            onLocationSelected: onLocationSelected,
+            googleApiKey: googleApiKey,
           ),
           const SizedBox(height: 16),
           ScheduleSection(

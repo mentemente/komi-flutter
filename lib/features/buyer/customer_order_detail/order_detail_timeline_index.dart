@@ -29,12 +29,12 @@ List<OrderDetailTimelineStep> buyerOrderTimelineSteps(
   return const [
     OrderDetailTimelineStep(title: 'Pendiente', subtitle: 'Espera un momento'),
     OrderDetailTimelineStep(
-      title: 'Pagado',
-      subtitle: 'Tu pago ha sido confirmado!',
+      title: 'Confirmado',
+      subtitle: 'Tu pedido fue confirmado',
     ),
     OrderDetailTimelineStep(
       title: 'Listo',
-      subtitle: 'Tu pedido salió de cocina',
+      subtitle: 'Tu pedido está listo para entregar',
     ),
     OrderDetailTimelineStep(
       title: 'En camino',
@@ -47,7 +47,6 @@ List<OrderDetailTimelineStep> buyerOrderTimelineSteps(
   ];
 }
 
-/// Índice del paso activo según estado y tipo de entrega (alineado con [customerOrderProgress]).
 int buyerOrderTimelineActiveIndex({
   required OrderStatus status,
   required DeliveryType deliveryType,

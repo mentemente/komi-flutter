@@ -14,12 +14,12 @@ class DishItem {
   final bool isActive;
 
   factory DishItem.fromJson(Map<String, dynamic> json) => DishItem(
-        id: json['id'] as String? ?? '',
-        name: json['name'] as String? ?? '',
-        stock: json['stock'] as int? ?? 0,
-        price: (json['price'] as num?)?.toDouble() ?? 0.0,
-        isActive: json['isActive'] as bool? ?? true,
-      );
+    id: json['id'] as String? ?? '',
+    name: json['name'] as String? ?? '',
+    stock: json['stock'] as int? ?? 0,
+    price: (json['price'] as num?)?.toDouble() ?? 0.0,
+    isActive: json['isActive'] as bool? ?? true,
+  );
 }
 
 class StoreMenuSchedule {
@@ -61,16 +61,16 @@ class StoreMenuInfo {
   final String paymentQr;
 
   factory StoreMenuInfo.fromJson(Map<String, dynamic> json) => StoreMenuInfo(
-        name: json['name'] as String? ?? '',
-        isOpenNow: json['isOpenNow'] as bool? ?? false,
-        schedule: StoreMenuSchedule.fromJson(
-          json['schedule'] as Map<String, dynamic>? ?? {},
-        ),
-        pickupEnabled: json['pickupEnabled'] as bool? ?? false,
-        deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
-        deliveryCost: (json['deliveryCost'] as num?)?.toDouble() ?? 0.0,
-        paymentQr: json['paymentQr'] as String? ?? '',
-      );
+    name: json['name'] as String? ?? '',
+    isOpenNow: json['isOpenNow'] as bool? ?? false,
+    schedule: StoreMenuSchedule.fromJson(
+      json['schedule'] as Map<String, dynamic>? ?? {},
+    ),
+    pickupEnabled: json['pickupEnabled'] as bool? ?? false,
+    deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
+    deliveryCost: (json['deliveryCost'] as num?)?.toDouble() ?? 0.0,
+    paymentQr: json['paymentQr'] as String? ?? '',
+  );
 }
 
 class MenuDishes {
@@ -117,17 +117,11 @@ class StoreMenu {
   final MenuDishes dishes;
 
   factory StoreMenu.fromJson(Map<String, dynamic> data) => StoreMenu(
-        store: StoreMenuInfo.fromJson(
-          data['store'] as Map<String, dynamic>? ?? {},
-        ),
-        dishes: MenuDishes.fromJson(
-          data['dishes'] as Map<String, dynamic>? ?? {},
-        ),
-      );
+    store: StoreMenuInfo.fromJson(data['store'] as Map<String, dynamic>? ?? {}),
+    dishes: MenuDishes.fromJson(data['dishes'] as Map<String, dynamic>? ?? {}),
+  );
 }
 
-/// Un ítem del carrito de tipo "menú": plato de fondo + entrada, bebida y postre opcionales.
-/// Por regla de negocio, ninguno de los acompañantes (appetizer/beverage/dessert) tiene precio.
 class MenuCartEntry {
   const MenuCartEntry({
     required this.mainCourse,

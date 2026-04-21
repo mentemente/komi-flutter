@@ -14,11 +14,9 @@ class RestaurantDetailReady extends RestaurantDetailState {
   final StoreMenu menu;
 }
 
-/// Menú no disponible: la API indica que la tienda está cerrada hoy (`STORE_CLOSED_TODAY`).
 class RestaurantDetailStoreClosedToday extends RestaurantDetailState {
   const RestaurantDetailStoreClosedToday({this.weekdayKey});
 
-  /// Valor en inglés desde `details.weekday` (p. ej. `sunday`), si viene en la respuesta.
   final String? weekdayKey;
 }
 

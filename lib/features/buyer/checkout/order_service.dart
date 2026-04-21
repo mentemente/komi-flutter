@@ -31,7 +31,6 @@ class OrderService {
     final input = checkout.input;
     final combos = <Map<String, dynamic>>[];
 
-    // Cada MenuCartEntry → un combo tipo "menu"
     for (final entry in input.menuCart) {
       final items = <Map<String, dynamic>>[
         _dishItem(entry.mainCourse, 'main_course'),
@@ -42,7 +41,6 @@ class OrderService {
       combos.add({'type': 'menu', 'items': items});
     }
 
-    // Platos a la carta → un combo por unidad
     for (final entry in input.execCounts.entries) {
       final count = entry.value;
       if (count <= 0) continue;

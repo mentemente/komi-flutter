@@ -12,6 +12,7 @@ import 'package:komi_fe/features/seller/creation/widgets/creation_step_two_form.
 import 'package:komi_fe/features/seller/creation/widgets/delivery_options_section.dart';
 import 'package:komi_fe/features/seller/creation/widgets/payment_method_section.dart';
 import 'package:komi_fe/features/seller/creation/widgets/schedule_section.dart';
+import 'package:komi_fe/features/seller/creation/places_service.dart';
 
 class CreationPage extends StatefulWidget {
   const CreationPage({super.key});
@@ -31,6 +32,13 @@ class _CreationPageState extends State<CreationPage> {
   final _addressController = TextEditingController();
   final _referenceController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  // Location coordinates
+  double? _storeLatitude;
+  double? _storeLongitude;
+
+  static const String _googleMapsApiKey =
+      'AIzaSyD4bfGj7Hu1b5hHTfVY_NnLwt6PB2DvORA';
 
   ScheduleMode _scheduleMode = ScheduleMode.allDays;
 
@@ -98,6 +106,12 @@ class _CreationPageState extends State<CreationPage> {
 
   void _goToStepTwo() {
     if (!_formKey.currentState!.validate()) return;
+    if (_storeLatitude == null || _storeLongitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor selecciona una ubicación')),
+      );
+      return;
+    }
     setState(() => _currentStep = 1);
   }
 
@@ -174,6 +188,12 @@ class _CreationPageState extends State<CreationPage> {
 
   Future<void> _onCreate() async {
     if (!_isStepTwoValid() || _isSubmitting) return;
+    if (_storeLatitude == null || _storeLongitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ubicación no disponible')),
+      );
+      return;
+    }
 
     setState(() => _isSubmitting = true);
     try {
@@ -205,6 +225,8 @@ class _CreationPageState extends State<CreationPage> {
           'cashOnDelivery': _paymentMethods.contains(PaymentMethod.cash),
           'prepaid': _paymentMethods.contains(PaymentMethod.yapePlin),
         },
+        latitude: _storeLatitude!,
+        longitude: _storeLongitude!,
       );
 
       if (!mounted) return;
@@ -295,6 +317,13 @@ class _CreationPageState extends State<CreationPage> {
       addressController: _addressController,
       referenceController: _referenceController,
       descriptionController: _descriptionController,
+      onLocationSelected: (LocationCoordinates coords) {
+        setState(() {
+          _storeLatitude = coords.latitude;
+          _storeLongitude = coords.longitude;
+        });
+      },
+      googleApiKey: _googleMapsApiKey,
       scheduleMode: _scheduleMode,
       onScheduleModeChanged: (m) => setState(() => _scheduleMode = m),
       allDaysOpen: _allDaysOpen,
