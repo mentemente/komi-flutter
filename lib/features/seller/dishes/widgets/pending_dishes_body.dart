@@ -227,13 +227,16 @@ class _PendingDishesBodyState extends ConsumerState<PendingDishesBody> {
         ),
         const SizedBox(height: 12),
         if (_photoBytes != null && _photoBytes!.isNotEmpty)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: AspectRatio(
-              aspectRatio: 16 / 10,
-              child: Image.memory(
-                Uint8List.fromList(_photoBytes!),
-                fit: BoxFit.cover,
+          GestureDetector(
+            onTap: () => _showFullscreenMemoryImage(context, _photoBytes!),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 16 / 10,
+                child: Image.memory(
+                  Uint8List.fromList(_photoBytes!),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -260,6 +263,86 @@ class _PendingDishesBodyState extends ConsumerState<PendingDishesBody> {
           ),
         ),
       ],
+    );
+  }
+}
+
+void _showFullscreenMemoryImage(BuildContext context, List<int> bytes) {
+  showGeneralDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black.withValues(alpha: 0.94),
+    transitionDuration: const Duration(milliseconds: 220),
+    pageBuilder: (dialogContext, animation, secondaryAnimation) {
+      return FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        child: _FullscreenMemoryImageView(bytes: bytes),
+      );
+    },
+  );
+}
+
+class _FullscreenMemoryImageView extends StatelessWidget {
+  const _FullscreenMemoryImageView({required this.bytes});
+
+  final List<int> bytes;
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = MediaQuery.paddingOf(context);
+    final size = MediaQuery.sizeOf(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: padding.top + 4,
+                bottom: padding.bottom + 4,
+                left: 8,
+                right: 8,
+              ),
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 5,
+                clipBehavior: Clip.none,
+                child: Center(
+                  child: Image.memory(
+                    Uint8List.fromList(bytes),
+                    fit: BoxFit.contain,
+                    width: size.width - 16,
+                    height: size.height - padding.vertical - 8,
+                    errorBuilder: (_, _, _) => Icon(
+                      Icons.broken_image_outlined,
+                      size: 64,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: padding.top + 4,
+            right: 8,
+            child: Material(
+              color: Colors.black45,
+              shape: const CircleBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: IconButton(
+                icon: const Icon(Icons.close_rounded, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: 'Cerrar',
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

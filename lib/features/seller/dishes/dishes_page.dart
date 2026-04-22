@@ -16,6 +16,27 @@ import 'package:komi_fe/features/seller/dishes/widgets/pending_dishes_body.dart'
 import 'package:komi_fe/features/seller/dishes/widgets/previous_dishes_bottom_sheet.dart';
 import 'package:komi_fe/providers/auth_session_provider.dart';
 
+bool _typeRequiresPrice(MenuItemType type) {
+  return type == MenuItemType.main_course ||
+      type == MenuItemType.executive_dish;
+}
+
+String? _publishValidationMessage(List<DailyMenuItem> dishes) {
+  for (final d in dishes) {
+    final name = d.name.trim();
+    if (name.length < 3) {
+      return 'Cada plato debe tener un nombre de al menos 3 caracteres.';
+    }
+    if (_typeRequiresPrice(d.type)) {
+      final p = d.price;
+      if (p == null || p.isNaN || p <= 0) {
+        return 'Los platos de segundo y a la carta deben tener un precio mayor a 0.';
+      }
+    }
+  }
+  return null;
+}
+
 class DishesPage extends ConsumerStatefulWidget {
   const DishesPage({super.key});
 
@@ -232,12 +253,44 @@ class _DishesPageState extends ConsumerState<DishesPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 152),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TitleProfileHeader(title: 'Mis platos'),
               const SizedBox(height: 20),
+              if (dailyDishes.isNotEmpty) ...[
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: _publishingMenu
+                        ? null
+                        : () async {
+                            final msg =
+                                _publishValidationMessage(dailyDishes);
+                            if (msg != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(msg)),
+                              );
+                              return;
+                            }
+                            await _publishMenuToday();
+                          },
+                    child: _publishingMenu
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Publicar menú de hoy'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               DishAccordion(
                 title: 'Platos del día',
                 isExpanded: dailyExpanded,
@@ -251,8 +304,6 @@ class _DishesPageState extends ConsumerState<DishesPage> {
                   onEditItem: (index, item) =>
                       _openEditDailyModal(context, index, item),
                   onDeleteItem: (index) => _controller.removeDishAt(index),
-                  onPublishToday: _publishMenuToday,
-                  isPublishing: _publishingMenu,
                 ),
               ),
               const SizedBox(height: 8),
