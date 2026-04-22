@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
+import 'package:komi_fe/core/widgets/order_card.dart';
 import 'package:komi_fe/features/buyer/customer_order_detail/customer_order_detail_controller.dart';
 import 'package:komi_fe/features/buyer/customer_order_detail/customer_order_detail_state.dart';
 import 'package:komi_fe/features/buyer/customer_order_detail/order_detail_timeline_index.dart';
@@ -74,6 +76,7 @@ class _CustomerOrderDetailPageState extends State<CustomerOrderDetailPage> {
                   ),
                 CustomerOrderDetailReady(:final order) => _OrderDetailBody(
                   order: order,
+                  onCompleted: () => context.go(RouteNames.restaurants),
                 ),
               };
             },
@@ -84,13 +87,35 @@ class _CustomerOrderDetailPageState extends State<CustomerOrderDetailPage> {
   }
 }
 
-class _OrderDetailBody extends StatelessWidget {
-  const _OrderDetailBody({required this.order});
+class _OrderDetailBody extends StatefulWidget {
+  const _OrderDetailBody({required this.order, this.onCompleted});
 
   final BuyerOrder order;
+  final VoidCallback? onCompleted;
+
+  @override
+  State<_OrderDetailBody> createState() => _OrderDetailBodyState();
+}
+
+class _OrderDetailBodyState extends State<_OrderDetailBody> {
+  bool _navigated = false;
+
+  @override
+  void didUpdateWidget(_OrderDetailBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_navigated &&
+        oldWidget.order.status != widget.order.status &&
+        widget.order.status == OrderStatus.completed) {
+      _navigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onCompleted?.call();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final order = widget.order;
     final title = order.storeName.trim().isNotEmpty
         ? order.storeName
         : 'Pedido';
@@ -108,12 +133,18 @@ class _OrderDetailBody extends StatelessWidget {
                 OrderDetailMetaSection(order: order),
                 OrderDetailSummaryCard(order: order),
                 const SizedBox(height: 20),
-                OrderDetailStatusCard(
-                  steps: buyerOrderTimelineSteps(order.deliveryType),
-                  activeIndex: buyerOrderTimelineActiveIndex(
-                    status: order.status,
-                    deliveryType: order.deliveryType,
-                  ),
+                Builder(
+                  builder: (_) {
+                    final steps = buyerOrderTimelineSteps(order);
+                    return OrderDetailStatusCard(
+                      steps: steps,
+                      activeIndex: buyerOrderTimelineActiveIndex(
+                        status: order.status,
+                        deliveryType: order.deliveryType,
+                        stepsCount: steps.length,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
