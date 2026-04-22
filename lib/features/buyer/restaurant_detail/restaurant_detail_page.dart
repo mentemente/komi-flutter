@@ -205,11 +205,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         child: CircularProgressIndicator(color: AppColors.primary),
       ),
       RestaurantDetailStoreClosedToday(:final weekdayKey) =>
-        StoreClosedTodayPanel(
-          weekdayKey: weekdayKey,
-          onBrowseRestaurants: () => context.go(RouteNames.restaurants),
-          onRetry: () => _controller.load(widget.storeId),
-        ),
+        StoreClosedTodayPanel(weekdayKey: weekdayKey),
       RestaurantDetailError(:final message) => RestaurantDetailLoadErrorBody(
         message: message,
         onRetry: () => _controller.load(widget.storeId),
@@ -449,13 +445,14 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         }
         double userLat = 0.0, userLng = 0.0;
         try {
-          final pos =
-              await ServiceLocator.locationService.getCurrentPosition();
+          final pos = await ServiceLocator.locationService.getCurrentPosition();
           userLat = pos.latitude;
           userLng = pos.longitude;
         } catch (_) {}
         if (!mounted) return;
-        ref.read(checkoutProvider.notifier).initialize(
+        ref
+            .read(checkoutProvider.notifier)
+            .initialize(
               CheckoutInput(
                 menuCart: List.from(_menuCart),
                 execCounts: Map.from(_execCounts),

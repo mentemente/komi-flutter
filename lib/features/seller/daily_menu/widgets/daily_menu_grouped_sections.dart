@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 import 'package:komi_fe/features/seller/daily_menu/widgets/daily_menu_section.dart';
 
-/// Sections Entrees / Beverages / Menus / Executive Dishes.
 class DailyMenuGroupedSections extends StatelessWidget {
   const DailyMenuGroupedSections({
     super.key,

@@ -59,19 +59,15 @@ class CheckoutNotifier extends Notifier<CheckoutState?> {
     );
   }
 
-  /// Elimina una entrada de menú (plato de fondo) — remueve la última del grupo.
   void removeMenuEntry(String mainCourseId) {
     final current = state;
     if (current == null) return;
     final menuCart = List<MenuCartEntry>.from(current.input.menuCart);
-    final idx = menuCart.lastIndexWhere(
-      (e) => e.mainCourse.id == mainCourseId,
-    );
+    final idx = menuCart.lastIndexWhere((e) => e.mainCourse.id == mainCourseId);
     if (idx != -1) menuCart.removeAt(idx);
     state = current.copyWith(input: current.input.copyWith(menuCart: menuCart));
   }
 
-  /// Reduce en 1 la cantidad de un plato a la carta; si llega a 0 lo elimina.
   void decrementExecDish(String dishId) {
     final current = state;
     if (current == null) return;
@@ -89,7 +85,6 @@ class CheckoutNotifier extends Notifier<CheckoutState?> {
     state = state?.copyWith(isSubmittingOrder: value);
   }
 
-  /// Llama a POST /v1/order. Lanza [ApiException] o [Exception] en caso de error.
   Future<OrderResult> submitOrder() async {
     final current = state;
     if (current == null) throw Exception('Estado de checkout inválido');

@@ -11,7 +11,7 @@ class ApiException implements Exception {
     this.details,
   });
 
-  /// Extrae los mensajes de validación de [details] si es una lista.
+  /// Extracts the validation messages from [details] if it is a list.
   List<String> get validationErrors {
     if (details is! List) return [];
     return (details as List)
@@ -20,7 +20,7 @@ class ApiException implements Exception {
         .toList();
   }
 
-  /// Retorna el primer error de validación o el [message] general.
+  /// Returns the first validation error or the general [message].
   String get displayMessage {
     final errors = validationErrors;
     return errors.isNotEmpty ? errors.first : message;

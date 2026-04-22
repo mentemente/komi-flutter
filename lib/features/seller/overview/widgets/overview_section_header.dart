@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
 
-/// Encabezado «título + ver más» para secciones del resumen.
 class OverviewSectionHeader extends StatelessWidget {
   const OverviewSectionHeader({
     super.key,

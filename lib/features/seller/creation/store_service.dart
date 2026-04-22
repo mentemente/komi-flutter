@@ -5,11 +5,6 @@ class StoreService {
 
   final HttpClient _client;
 
-  static const Map<String, double> testLocation = {
-    'latitude': -11.978692355120852,
-    'longitude': -77.06727503576046,
-  };
-
   Future<Map<String, dynamic>> createStore({
     required String name,
     required String description,
@@ -19,6 +14,8 @@ class StoreService {
     required bool deliveryEnabled,
     required double deliveryCost,
     required Map<String, bool> payments,
+    required double latitude,
+    required double longitude,
   }) {
     return _client.post<Map<String, dynamic>>(
       '/v1/store',
@@ -27,7 +24,10 @@ class StoreService {
         'name': name,
         'description': description,
         'paymentQr': paymentQr,
-        'location': testLocation,
+        'location': {
+          'latitude': latitude,
+          'longitude': longitude,
+        },
         'schedules': schedules,
         'pickupEnabled': pickupEnabled,
         'deliveryEnabled': deliveryEnabled,

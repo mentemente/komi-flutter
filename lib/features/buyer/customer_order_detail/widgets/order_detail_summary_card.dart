@@ -117,7 +117,6 @@ class OrderDetailDishLineRow extends StatelessWidget {
   }
 }
 
-/// Subtotal, delivery inferido (si aplica) y total, dentro del acordeón «Tu orden».
 class _OrderTotalsBox extends StatelessWidget {
   const _OrderTotalsBox({required this.order});
 
@@ -136,9 +135,7 @@ class _OrderTotalsBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.textDark.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.textGray.withValues(alpha: 0.22),
-        ),
+        border: Border.all(color: AppColors.textGray.withValues(alpha: 0.22)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -204,10 +201,7 @@ class _TotalSummaryRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: valueStyle.copyWith(color: AppColors.textGray),
-        ),
+        Text(label, style: valueStyle.copyWith(color: AppColors.textGray)),
         Text(valueText, style: valueStyle),
       ],
     );

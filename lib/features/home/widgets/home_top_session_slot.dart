@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Contenedor alineado a la derecha (mismo ancho máximo que [HomeContent]) para
-/// acciones de sesión en la parte superior del home (Iniciar sesión / Salir).
 class HomeTopSessionSlot extends StatelessWidget {
   const HomeTopSessionSlot({
     super.key,
@@ -22,10 +20,7 @@ class HomeTopSessionSlot extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: child,
-          ),
+          child: Align(alignment: Alignment.centerRight, child: child),
         ),
       ),
     );
