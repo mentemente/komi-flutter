@@ -438,6 +438,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         : 's/${subtotal.toStringAsFixed(2)}';
     return RestaurantOrderCartBar(
       subtotalLabel: priceStr,
+      enabled: menu.store.isOpenNow,
       onVerifyOrder: () async {
         if (!_hasAuthToken) {
           await _showLoginRequiredDialog();
