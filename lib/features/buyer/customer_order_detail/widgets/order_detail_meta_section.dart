@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/models/payment_condition.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
@@ -34,6 +36,10 @@ class OrderDetailMetaSection extends StatelessWidget {
           label: 'Dirección',
           value: order.addressReference!,
         ),
+      if (order.deliveryType == DeliveryType.pickup &&
+          order.coordLat != null &&
+          order.coordLng != null)
+        _OpenMapsButton(lat: order.coordLat!, lng: order.coordLng!),
     ];
 
     if (rows.length == 1) {
@@ -180,6 +186,89 @@ class OrderDetailMetaLine extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _OpenMapsButton extends StatelessWidget {
+  const _OpenMapsButton({required this.lat, required this.lng});
+
+  final double lat;
+  final double lng;
+
+  String get _mapsUrl => 'https://www.google.com/maps?q=$lat,$lng';
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _MapsActionButton(
+          icon: Icons.location_on_outlined,
+          label: 'Ver en Maps',
+          onTap: () async {
+            final uri = Uri.parse(_mapsUrl);
+            if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No se pudo abrir Google Maps.')),
+              );
+            }
+          },
+        ),
+        const SizedBox(width: 6),
+        _MapsActionButton(
+          icon: Icons.copy_rounded,
+          label: 'Copiar enlace',
+          onTap: () async {
+            await Clipboard.setData(ClipboardData(text: _mapsUrl));
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Enlace copiado')),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _MapsActionButton extends StatelessWidget {
+  const _MapsActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15, color: AppColors.primary),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: AppTextStyles.small.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

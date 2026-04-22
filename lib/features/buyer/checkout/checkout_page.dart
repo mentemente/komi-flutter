@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
+import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/network/api_exception.dart';
 import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,7 +111,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           duration: const Duration(seconds: 3),
         ),
       );
-      context.pop();
+      context.go(RouteNames.orders);
     } on ApiException catch (e) {
       if (!mounted) return;
       _showOrderError(e);
