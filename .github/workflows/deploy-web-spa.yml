@@ -1,0 +1,84 @@
+name: Deploy Flutter Web SPA to S3 + CloudFront
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "GitHub Environment to use (must exist in repo settings)"
+        required: true
+        type: choice
+        options:
+          - qa
+          - prod
+  push:
+    branches:
+      - main
+      - qa
+    paths:
+      - "lib/**"
+      - "web/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/deploy-web-spa.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-web-spa-${{ github.ref }}-${{ inputs.environment || (github.ref_name == 'main' && 'prod' || 'qa') }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy SPA
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || (github.ref_name == 'main' && 'prod' || 'qa') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web (SPA)
+        run: flutter build web --release
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy static assets to S3
+        run: |
+          aws s3 sync build/web "s3://${{ secrets.S3_BUCKET_NAME }}" \
+            --delete \
+            --exclude "index.html" \
+            --exclude "flutter_service_worker.js" \
+            --exclude "flutter.js" \
+            --exclude "flutter_bootstrap.js" \
+            --exclude "version.json" \
+            --cache-control "public,max-age=3600"
+
+      - name: Upload runtime files with no-cache
+        run: |
+          for file in index.html flutter_service_worker.js flutter.js flutter_bootstrap.js version.json; do
+            if [ -f "build/web/$file" ]; then
+              aws s3 cp "build/web/$file" "s3://${{ secrets.S3_BUCKET_NAME }}/$file" \
+                --cache-control "no-cache,no-store,must-revalidate"
+            fi
+          done
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*"

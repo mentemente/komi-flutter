@@ -31,6 +31,17 @@
 
   <title>komi_fe</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    Google Maps JavaScript API.
+    Se carga ANTES de flutter_bootstrap.js para que `google.maps` esté
+    disponible cuando google_maps_flutter_web inicialice el widget GoogleMap
+    y cuando places_helper.js use google.maps.places.
+  -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4bfGj7Hu1b5hHTfVY_NnLwt6PB2DvORA&libraries=places&loading=async"
+    defer></script>
+  <script src="places_helper.js" defer></script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
