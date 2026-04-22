@@ -1,3 +1,4 @@
+import 'package:komi_fe/core/config/app_config.dart';
 import 'package:komi_fe/core/network/http_client.dart';
 import 'package:komi_fe/core/network/upload_service.dart';
 import 'package:komi_fe/features/auth/login/login_service.dart';
@@ -16,7 +17,7 @@ abstract final class ServiceLocator {
   ServiceLocator._();
 
   static final httpClient = HttpClient(
-    baseUrl: 'https://mms-komi-qa.up.railway.app',
+    baseUrl: AppConfig.apiBaseUrl,
   );
 
   static final locationService = LocationService();

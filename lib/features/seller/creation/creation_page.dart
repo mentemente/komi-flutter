@@ -12,6 +12,7 @@ import 'package:komi_fe/features/seller/creation/widgets/creation_step_two_form.
 import 'package:komi_fe/features/seller/creation/widgets/delivery_options_section.dart';
 import 'package:komi_fe/features/seller/creation/widgets/payment_method_section.dart';
 import 'package:komi_fe/features/seller/creation/widgets/schedule_section.dart';
+import 'package:komi_fe/core/config/app_config.dart';
 import 'package:komi_fe/features/seller/creation/places_service.dart';
 
 class CreationPage extends StatefulWidget {
@@ -37,8 +38,7 @@ class _CreationPageState extends State<CreationPage> {
   double? _storeLatitude;
   double? _storeLongitude;
 
-  static const String _googleMapsApiKey =
-      'AIzaSyD4bfGj7Hu1b5hHTfVY_NnLwt6PB2DvORA';
+  static const String _googleMapsApiKey = AppConfig.googleMapsApiKey;
 
   ScheduleMode _scheduleMode = ScheduleMode.allDays;
 

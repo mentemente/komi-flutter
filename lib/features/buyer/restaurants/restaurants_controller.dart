@@ -22,7 +22,6 @@ class RestaurantsController {
     const RestaurantsLoading(),
   );
 
-  /// Indica búsqueda en curso (POST `/v1/store/nearby` tras debounce).
   final ValueNotifier<bool> searchInProgress = ValueNotifier(false);
 
   List<NearbyStore> _allStores = [];
@@ -32,7 +31,6 @@ class RestaurantsController {
 
   Timer? _searchDebounceTimer;
 
-  /// Evita aplicar respuestas obsoletas cuando hay varias peticiones en vuelo.
   int _fetchGeneration = 0;
 
   static const Duration _searchDebounceDuration = Duration(milliseconds: 400);
@@ -74,8 +72,6 @@ class RestaurantsController {
     }
   }
 
-  /// Programa una llamada a [RestaurantsService.fetchNearby] con debounce
-  /// (mismo cuerpo que `POST /v1/store/nearby`: coordinates + searchText).
   void scheduleDebouncedNearbySearch(String rawQuery) {
     _searchDebounceTimer?.cancel();
     _searchDebounceTimer = Timer(_searchDebounceDuration, () {

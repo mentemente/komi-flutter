@@ -18,7 +18,6 @@ class PendingDishCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = item.type.cardColor;
-    final showPrice = item.type.isPricedDishCategory && item.price != null;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -35,33 +34,17 @@ class PendingDishCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        item.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.subtitle2.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    if (showPrice) ...[
-                      const SizedBox(width: 6),
-                      Text(
-                        'S/${item.price!.toStringAsFixed(0)}',
-                        style: AppTextStyles.small.copyWith(
-                          color: AppColors.textDark,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.subtitle2.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Stock: ${item.stock}',
+                  'Stock: ${item.stock}  •  S/${item.price != null ? item.price!.toStringAsFixed(0) : '-'}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.small.copyWith(

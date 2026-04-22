@@ -47,8 +47,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Create env.json
+        run: |
+          echo '{
+            "API_BASE_URL": "${{ secrets.API_BASE_URL }}",
+            "GOOGLE_MAPS_API_KEY": "${{ secrets.GOOGLE_MAPS_API_KEY }}",
+            "X-API-KEY": "${{ secrets.X-API-KEY }}"
+          }' > env.json
+
       - name: Build Flutter Web (SPA)
-        run: flutter build web --release
+        run: flutter build web --release --dart-define-from-file=env.json
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
