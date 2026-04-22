@@ -52,7 +52,7 @@ jobs:
           echo '{
             "API_BASE_URL": "${{ secrets.API_BASE_URL }}",
             "GOOGLE_MAPS_API_KEY": "${{ secrets.GOOGLE_MAPS_API_KEY }}",
-            "X-API-KEY": "${{ secrets.X-API-KEY }}"
+            "X-API-KEY": "${{ secrets.X_API_KEY }}"
           }' > env.json
 
       - name: Build Flutter Web (SPA)
