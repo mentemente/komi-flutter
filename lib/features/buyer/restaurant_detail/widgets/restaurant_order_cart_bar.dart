@@ -8,11 +8,13 @@ class RestaurantOrderCartBar extends StatelessWidget {
     required this.subtotalLabel,
     required this.onVerifyOrder,
     this.verifyLabel = 'Verificar pedido',
+    this.enabled = true,
   });
 
   final String subtotalLabel;
   final VoidCallback onVerifyOrder;
   final String verifyLabel;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class RestaurantOrderCartBar extends StatelessWidget {
             child: SizedBox(
               height: 52,
               child: ElevatedButton(
-                onPressed: onVerifyOrder,
+                onPressed: enabled ? onVerifyOrder : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
