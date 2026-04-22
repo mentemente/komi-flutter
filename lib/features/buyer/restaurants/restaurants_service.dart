@@ -1,8 +1,6 @@
+import 'package:komi_fe/core/config/app_config.dart';
 import 'package:komi_fe/core/network/http_client.dart';
 import 'package:komi_fe/features/buyer/restaurants/restaurants_model.dart';
-
-const String _kApiKey =
-    '45b9acda89d0119093fd77ff05b98b4696d982f964f2153ee2616a41af056fe0';
 
 class RestaurantsService {
   RestaurantsService(this._client);
@@ -25,7 +23,7 @@ class RestaurantsService {
     }
     return _client.post<List<NearbyStore>>(
       '/v1/store/nearby',
-      headers: {'x-api-key': _kApiKey},
+      headers: {'x-api-key': AppConfig.xApiKey},
       body: body,
       fromJson: (data) {
         final raw = data['stores'] as List<dynamic>? ?? [];

@@ -276,7 +276,7 @@ class _EditDishModalState extends State<EditDishModal> {
     if (name.length < 3) return false;
 
     final stock = int.tryParse(_unitController.text.trim());
-    if (stock == null || stock <= 0) return false;
+    if (stock == null) return false;
 
     if (_typeRequiresPrice(_selectedType)) {
       final priceText = _priceController.text.trim();
