@@ -23,6 +23,20 @@ class FoodService {
     );
   }
 
+  /// Update several foods in one call (`PATCH /v1/food/many`).
+  /// Each map in [foods] must include at least `id` and the fields to modify.
+  Future<List<DailyMenuItem>> patchFoodsMany({
+    required String storeId,
+    required List<Map<String, dynamic>> foods,
+  }) async {
+    final raw = await _client.patchList(
+      '/v1/food/many',
+      body: <String, dynamic>{'foods': foods},
+      headers: <String, String>{'store-id': storeId},
+    );
+    return raw.map(DailyMenuItem.fromFoodApiMap).toList();
+  }
+
   /// Update a food (`PATCH /v1/food/{id}`), e.g. `isActive`.
   Future<DailyMenuItem> patchFood({
     required String storeId,

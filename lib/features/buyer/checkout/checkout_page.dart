@@ -11,8 +11,10 @@ import 'package:komi_fe/core/theme/app_text_styles.dart';
 import 'package:komi_fe/core/formatting/currency_format.dart';
 import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
 import 'package:komi_fe/features/buyer/checkout/checkout_provider.dart';
+import 'package:komi_fe/features/auth/models/auth_response.dart';
 import 'package:komi_fe/features/buyer/checkout/checkout_state.dart';
 import 'package:komi_fe/features/buyer/restaurant_detail/restaurant_detail_model.dart';
+import 'package:komi_fe/providers/auth_session_provider.dart';
 
 const _kSuccessGreen = Color(0xFF2D9D5C);
 
@@ -47,6 +49,45 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     _fullNameCtrl.addListener(_onStep2FieldChanged);
     _phoneCtrl.addListener(_onStep2FieldChanged);
     _referenceCtrl.addListener(_onStep2FieldChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _autofillFormFromSession();
+    });
+  }
+
+  /// Autocomplete name and phone (same as `komi_auth_user_payload`).
+  void _autofillFormFromSession() {
+    final session = ref.read(authSessionProvider);
+    if (session == null) return;
+
+    if (_fullNameCtrl.text.trim().isEmpty) {
+      final n = session.name.trim();
+      if (n.isNotEmpty) {
+        _fullNameCtrl.text = n.length > 100 ? n.substring(0, 100) : n;
+      }
+    }
+
+    if (_phoneCtrl.text.trim().isEmpty) {
+      final p = _normalizePeruPhoneForForm(session.phone);
+      if (p != null) {
+        _phoneCtrl.text = p;
+      }
+    }
+  }
+
+  /// Accepts 9 digits or prefix 51; returns 9XXXXXXXX for the form.
+  String? _normalizePeruPhoneForForm(String phone) {
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length == 9 && digits.startsWith('9')) return digits;
+    if (digits.length == 11 && digits.startsWith('51')) {
+      final rest = digits.substring(2);
+      if (rest.length == 9 && rest.startsWith('9')) return rest;
+    }
+    if (digits.length >= 9) {
+      final last = digits.substring(digits.length - 9);
+      if (last.startsWith('9')) return last;
+    }
+    return null;
   }
 
   @override
@@ -118,7 +159,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al confirmar el pedido. Intenta de nuevo.')),
+        const SnackBar(
+          content: Text('Error al confirmar el pedido. Intenta de nuevo.'),
+        ),
       );
     }
   }
@@ -133,7 +176,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       case 'STORE_CLOSED_TODAY':
         message = 'El local está cerrado hoy';
       case 'ORDER_OPTION_NOT_ALLOWED':
-        message = 'El tipo de entrega seleccionado no está disponible en este local';
+        message =
+            'El tipo de entrega seleccionado no está disponible en este local';
       default:
         message = e.displayMessage;
     }
@@ -158,6 +202,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
       });
       return const SizedBox.shrink();
     }
+
+    // If the session arrives after `hydrate()` (same data as SharedPreferences), fill in.
+    ref.listen<AuthResponse?>(authSessionProvider, (prev, next) {
+      if (next == null || !mounted) return;
+      _autofillFormFromSession();
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -354,9 +404,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     controller: _fullNameCtrl,
                     hint: 'Tu nombre completo',
                     maxLength: 100,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(100),
-                    ],
+                    inputFormatters: [LengthLimitingTextInputFormatter(100)],
                     validator: (v) {
                       final s = v?.trim() ?? '';
                       if (s.isEmpty) return 'Campo requerido';
@@ -371,9 +419,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                       controller: _referenceCtrl,
                       hint: 'Dirección o referencia de entrega',
                       maxLength: 250,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(250),
-                      ],
+                      inputFormatters: [LengthLimitingTextInputFormatter(250)],
                       validator: (v) {
                         final s = v?.trim() ?? '';
                         if (s.isEmpty) return 'Campo requerido';
@@ -449,8 +495,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   // ── Step 3: Payment method ─────────────────────────────────────────────────
 
   Widget _buildStep3(CheckoutState checkout) {
+    final s = checkout.input.storeInfo;
+    final showYape = s.prepaid;
+    final showCash = s.cashOnDelivery;
+    final hasAnyPayment = showYape || showCash;
     final isYape = checkout.paymentMethod == PaymentMethod.yapePlin;
-    final qrUrl = checkout.input.storeInfo.paymentQr;
+    final isCash = checkout.paymentMethod == PaymentMethod.cash;
+    final qrUrl = s.paymentQr;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -485,45 +536,64 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Payment method tabs
-                Row(
-                  children: [
-                    Expanded(
-                      child: _PaymentTab(
-                        label: 'Yape/Plin',
-                        isSelected: isYape,
-                        onTap: () => ref
-                            .read(checkoutProvider.notifier)
-                            .setPaymentMethod(PaymentMethod.yapePlin),
-                      ),
+                // Methods according to `store.payments` (prepaid = Yape/Plin, cashOnDelivery = cash)
+                if (!hasAnyPayment)
+                  Text(
+                    'Esta tienda no tiene métodos de pago habilitados. '
+                    'Intenta más tarde o contacta al local.',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: const Color(0xFFC62828),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _PaymentTab(
-                        label: 'Efectivo',
-                        isSelected: !isYape,
-                        onTap: () => ref
-                            .read(checkoutProvider.notifier)
-                            .setPaymentMethod(PaymentMethod.cash),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                  )
+                else
+                  Row(
+                    children: [
+                      if (showYape) ...[
+                        Expanded(
+                          child: _PaymentTab(
+                            label: 'Yape/Plin',
+                            isSelected: isYape,
+                            onTap: () => ref
+                                .read(checkoutProvider.notifier)
+                                .setPaymentMethod(PaymentMethod.yapePlin),
+                          ),
+                        ),
+                      ],
+                      if (showYape && showCash) const SizedBox(width: 10),
+                      if (showCash) ...[
+                        Expanded(
+                          child: _PaymentTab(
+                            label: 'Efectivo',
+                            isSelected: isCash,
+                            onTap: () => ref
+                                .read(checkoutProvider.notifier)
+                                .setPaymentMethod(PaymentMethod.cash),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                if (hasAnyPayment) const SizedBox(height: 20),
 
-                if (isYape) ...[
-                  _buildYapePlinContent(checkout, qrUrl),
-                ] else ...[
-                  _buildCashContent(checkout),
+                if (hasAnyPayment) ...[
+                  if (isYape) ...[
+                    _buildYapePlinContent(checkout, qrUrl),
+                  ] else ...[
+                    _buildCashContent(checkout),
+                  ],
                 ],
               ],
             ),
           ),
         ),
         _BottomBar(
-          label: checkout.isSubmittingOrder ? 'Confirmando...' : 'Confirmar pedido',
+          label: checkout.isSubmittingOrder
+              ? 'Confirmando...'
+              : 'Confirmar pedido',
           total: checkout.total,
-          enabled: !checkout.isSubmittingOrder &&
+          enabled:
+              hasAnyPayment &&
+              !checkout.isSubmittingOrder &&
               (!isYape ||
                   ((checkout.voucherUrl?.isNotEmpty ?? false) &&
                       !checkout.isUploadingVoucher)),
@@ -711,7 +781,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
         notifier.setVoucherUploading(false);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo obtener la URL del servidor')),
+          const SnackBar(
+            content: Text('No se pudo obtener la URL del servidor'),
+          ),
         );
         return;
       }
@@ -719,9 +791,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
     } on ApiException catch (e) {
       notifier.setVoucherUploading(false);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.displayMessage)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.displayMessage)));
     } catch (_) {
       notifier.setVoucherUploading(false);
       if (!mounted) return;

@@ -43,18 +43,21 @@ class MainCourseTile extends StatelessWidget {
   bool get _hasAnyExtras =>
       appetizers.isNotEmpty || beverages.isNotEmpty || desserts.isNotEmpty;
 
+  bool get _dishEnabled => dish.isActive;
+
   @override
   Widget build(BuildContext context) {
+    final showExtras = _dishEnabled && isExpanded;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isExpanded
+          color: showExtras
               ? AppColors.textDark
               : AppColors.textGray.withValues(alpha: 0.3),
-          width: isExpanded ? 1.5 : 1.0,
+          width: showExtras ? 1.5 : 1.0,
         ),
       ),
       child: Padding(
@@ -69,6 +72,11 @@ class MainCourseTile extends StatelessWidget {
                     dish.name,
                     style: AppTextStyles.subtitle2.copyWith(
                       fontWeight: FontWeight.w500,
+                      decoration:
+                          _dishEnabled ? null : TextDecoration.lineThrough,
+                      color: _dishEnabled
+                          ? null
+                          : AppColors.textGray.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -78,13 +86,21 @@ class MainCourseTile extends StatelessWidget {
                     formatSolesPrice(dish.price),
                     style: AppTextStyles.subtitle2.copyWith(
                       fontWeight: FontWeight.w600,
+                      decoration:
+                          _dishEnabled ? null : TextDecoration.lineThrough,
+                      color: _dishEnabled
+                          ? null
+                          : AppColors.textGray.withValues(alpha: 0.7),
                     ),
                   ),
                 const SizedBox(width: 8),
-                MenuCountBadge(count: count, onTap: onToggle),
+                MenuCountBadge(
+                  count: count,
+                  onTap: _dishEnabled ? onToggle : null,
+                ),
               ],
             ),
-            if (isExpanded) ...[
+            if (showExtras) ...[
               const SizedBox(height: 16),
               if (appetizers.isNotEmpty) ...[
                 const MenuSectionHeader(label: 'Escoge tu entrada'),
@@ -92,7 +108,8 @@ class MainCourseTile extends StatelessWidget {
                 for (final item in appetizers)
                   SelectableMenuDishRow(
                     item: item,
-                    isSelected: item.id == selectedAppetizerId,
+                    enabled: item.isActive,
+                    isSelected: item.isActive && item.id == selectedAppetizerId,
                     onTap: () => onAppetizerSelected(item.id),
                   ),
                 if (beverages.isNotEmpty || desserts.isNotEmpty)
@@ -104,7 +121,8 @@ class MainCourseTile extends StatelessWidget {
                 for (final item in beverages)
                   SelectableMenuDishRow(
                     item: item,
-                    isSelected: item.id == selectedBeverageId,
+                    enabled: item.isActive,
+                    isSelected: item.isActive && item.id == selectedBeverageId,
                     onTap: () => onBeverageSelected(item.id),
                   ),
                 if (desserts.isNotEmpty) const MenuSectionDivider(),
@@ -115,7 +133,8 @@ class MainCourseTile extends StatelessWidget {
                 for (final item in desserts)
                   SelectableMenuDishRow(
                     item: item,
-                    isSelected: item.id == selectedDessertId,
+                    enabled: item.isActive,
+                    isSelected: item.isActive && item.id == selectedDessertId,
                     onTap: () => onDessertSelected(item.id),
                   ),
               ],
@@ -124,7 +143,7 @@ class MainCourseTile extends StatelessWidget {
               SizedBox(
                 height: 44,
                 child: OutlinedButton(
-                  onPressed: onAgregar,
+                  onPressed: _dishEnabled ? onAgregar : null,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.textDark,
                     side: const BorderSide(color: AppColors.textDark),
