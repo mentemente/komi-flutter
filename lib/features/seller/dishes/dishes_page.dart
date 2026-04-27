@@ -10,6 +10,7 @@ import 'package:komi_fe/core/widgets/title_profile_header.dart';
 import 'package:komi_fe/features/seller/dishes/dishes_controller.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/add_dish_modal.dart';
+import 'package:komi_fe/features/seller/dishes/widgets/bulk_edit_catalog_foods_modal.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/daily_dishes_body.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/dish_accordion.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/pending_dishes_body.dart';
@@ -113,6 +114,29 @@ class _DishesPageState extends ConsumerState<DishesPage> {
   }
 
   void _onControllerUpdate() => setState(() {});
+
+  Future<void> _onBulkEditCatalog() async {
+    if (_catalogFoods.isEmpty) return;
+    final session = ref.read(authSessionProvider);
+    final storeId = session?.stores.isNotEmpty == true
+        ? session!.stores.first.id
+        : null;
+    if (storeId == null || storeId.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se encontró la tienda.')),
+      );
+      return;
+    }
+    final saved = await showBulkEditCatalogFoodsModal(
+      context: context,
+      storeId: storeId,
+      catalogFoods: _catalogFoods,
+    );
+    if (saved == true && mounted) {
+      await _loadCatalogFoods();
+    }
+  }
 
   void _openPendingDishesModal() {
     showDialog<void>(
@@ -300,6 +324,7 @@ class _DishesPageState extends ConsumerState<DishesPage> {
                   catalogLoading: _catalogLoading,
                   catalogError: _catalogError,
                   onRetryCatalog: _loadCatalogFoods,
+                  onBulkEditCatalog: _onBulkEditCatalog,
                   dailyDishes: dailyDishes,
                   onEditItem: (index, item) =>
                       _openEditDailyModal(context, index, item),

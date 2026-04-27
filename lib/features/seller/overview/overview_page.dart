@@ -5,6 +5,7 @@ import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/constants/route_names.dart';
 import 'package:komi_fe/core/network/service_locator.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
+import 'package:komi_fe/core/widgets/menu_type_color_legend.dart';
 import 'package:komi_fe/core/widgets/menu_item_card.dart';
 import 'package:komi_fe/core/widgets/title_profile_header.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
@@ -14,7 +15,6 @@ import 'package:komi_fe/features/seller/overview/overview_state.dart';
 import 'package:komi_fe/features/seller/overview/widgets/overview_menu_empty_state.dart';
 import 'package:komi_fe/features/seller/overview/widgets/overview_orders_section.dart';
 import 'package:komi_fe/features/seller/overview/widgets/overview_section_header.dart';
-import 'package:komi_fe/features/seller/overview/widgets/overview_stats_bar.dart';
 import 'package:komi_fe/providers/auth_session_provider.dart';
 
 class OverviewPage extends ConsumerStatefulWidget {
@@ -108,6 +108,8 @@ class _OverviewPageState extends ConsumerState<OverviewPage> {
                   onTap: () =>
                       context.go('${RouteNames.seller}${RouteNames.dailyMenu}'),
                 ),
+                const SizedBox(height: 8),
+                const MenuTypeColorLegend(),
                 const SizedBox(height: 12),
                 _buildMenuSection(menu),
               ],

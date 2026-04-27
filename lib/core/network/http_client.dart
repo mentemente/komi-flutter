@@ -113,6 +113,21 @@ class HttpClient {
     return _handleResponse(response, fromJson);
   }
 
+  /// PATCH when `data` in the response is a **list** (e.g. `PATCH /v1/food/many`).
+  Future<List<Map<String, dynamic>>> patchList(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
+    final mergedHeaders = {..._headers, ...?headers};
+    final response = await http.patch(
+      Uri.parse('$baseUrl$path'),
+      headers: mergedHeaders,
+      body: body != null ? jsonEncode(body) : null,
+    );
+    return _handleListDataResponse(response);
+  }
+
   /// DELETE request. Returns `data` parsed with [fromJson].
   Future<T> delete<T>(
     String path, {

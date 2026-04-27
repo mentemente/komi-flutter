@@ -19,6 +19,8 @@ class ExecutiveDishTile extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
+  bool get _enabled => dish.isActive;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,6 +37,10 @@ class ExecutiveDishTile extends StatelessWidget {
               dish.name,
               style: AppTextStyles.subtitle2.copyWith(
                 fontWeight: FontWeight.w500,
+                decoration: _enabled ? null : TextDecoration.lineThrough,
+                color: _enabled
+                    ? null
+                    : AppColors.textGray.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -43,14 +49,22 @@ class ExecutiveDishTile extends StatelessWidget {
             formatSolesPrice(dish.price),
             style: AppTextStyles.subtitle2.copyWith(
               fontWeight: FontWeight.w600,
+              decoration: _enabled ? null : TextDecoration.lineThrough,
+              color: _enabled
+                  ? null
+                  : AppColors.textGray.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(width: 8),
           if (count > 0) ...[
-            MenuSmallRoundButton(label: '−', filled: false, onTap: onRemove),
+            MenuSmallRoundButton(
+              label: '−',
+              filled: false,
+              onTap: count > 0 ? onRemove : null,
+            ),
             const SizedBox(width: 6),
           ],
-          MenuCountBadge(count: count, onTap: onAdd),
+          MenuCountBadge(count: count, onTap: _enabled ? onAdd : null),
         ],
       ),
     );

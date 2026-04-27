@@ -64,11 +64,22 @@ class CheckoutState {
             : input.storeInfo.pickupEnabled
             ? DeliveryType.pickup
             : DeliveryType.delivery;
+    final s = input.storeInfo;
+    final defaultPayment = _defaultPaymentMethod(s);
     return CheckoutState(
       input: input,
       deliveryType: defaultDelivery,
-      paymentMethod: PaymentMethod.yapePlin,
+      paymentMethod: defaultPayment,
     );
+  }
+
+  static PaymentMethod _defaultPaymentMethod(StoreMenuInfo s) {
+    if (s.prepaid && s.cashOnDelivery) {
+      return PaymentMethod.yapePlin;
+    }
+    if (s.prepaid) return PaymentMethod.yapePlin;
+    if (s.cashOnDelivery) return PaymentMethod.cash;
+    return PaymentMethod.yapePlin;
   }
 
   final CheckoutInput input;

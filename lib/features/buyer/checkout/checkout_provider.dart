@@ -22,7 +22,12 @@ class CheckoutNotifier extends Notifier<CheckoutState?> {
   }
 
   void setPaymentMethod(PaymentMethod method) {
-    state = state?.copyWith(paymentMethod: method);
+    final st = state;
+    if (st == null) return;
+    final s = st.input.storeInfo;
+    if (method == PaymentMethod.yapePlin && !s.prepaid) return;
+    if (method == PaymentMethod.cash && !s.cashOnDelivery) return;
+    state = st.copyWith(paymentMethod: method);
   }
 
   void updateFormField({

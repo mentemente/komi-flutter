@@ -321,109 +321,90 @@ class _EditDishModalState extends State<EditDishModal> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.textGray.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Editar plato:',
-              style: AppTextStyles.subtitle1.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.textGray.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Editar plato:',
+                style: AppTextStyles.subtitle1.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _nameController,
-              style: const TextStyle(color: AppColors.textDark, fontSize: 16),
-              decoration: InputDecoration(
-                labelText: 'Nombre del plato',
-                filled: true,
-                fillColor: AppColors.white,
-                border: _inputBorder,
-                enabledBorder: _inputBorder,
+              const SizedBox(height: 20),
+              TextField(
+                controller: _nameController,
+                style: const TextStyle(color: AppColors.textDark, fontSize: 16),
+                decoration: InputDecoration(
+                  labelText: 'Nombre del plato',
+                  filled: true,
+                  fillColor: AppColors.white,
+                  border: _inputBorder,
+                  enabledBorder: _inputBorder,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<MenuItemType>(
-              initialValue: _selectedType,
-              decoration: InputDecoration(
-                labelText: 'Tipo de comida',
-                filled: true,
-                fillColor: AppColors.white,
-                border: _inputBorder,
-                enabledBorder: _inputBorder,
-              ),
-              isExpanded: true,
-              items: const [
-                DropdownMenuItem(
-                  value: MenuItemType.appetizer,
-                  child: Text('Entrada'),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<MenuItemType>(
+                initialValue: _selectedType,
+                decoration: InputDecoration(
+                  labelText: 'Tipo de comida',
+                  filled: true,
+                  fillColor: AppColors.white,
+                  border: _inputBorder,
+                  enabledBorder: _inputBorder,
                 ),
-                DropdownMenuItem(
-                  value: MenuItemType.beverage,
-                  child: Text('Bebida'),
-                ),
-                DropdownMenuItem(
-                  value: MenuItemType.dessert,
-                  child: Text('Postre'),
-                ),
-                DropdownMenuItem(
-                  value: MenuItemType.main_course,
-                  child: Text('Plato de segundo'),
-                ),
-                DropdownMenuItem(
-                  value: MenuItemType.executive_dish,
-                  child: Text('Plato a la carta'),
-                ),
-              ],
-              onChanged: (value) {
-                if (value != null) setState(() => _selectedType = value);
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _unitController,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 16,
-                    ),
-                    inputFormatters: [LengthLimitingTextInputFormatter(10)],
-                    decoration: InputDecoration(
-                      labelText: 'Stock',
-                      filled: true,
-                      fillColor: AppColors.white,
-                      border: _inputBorder,
-                      enabledBorder: _inputBorder,
-                    ),
+                isExpanded: true,
+                items: const [
+                  DropdownMenuItem(
+                    value: MenuItemType.appetizer,
+                    child: Text('Entrada'),
                   ),
-                ),
-                if (_typeRequiresPrice(_selectedType)) ...[
-                  const SizedBox(width: 12),
+                  DropdownMenuItem(
+                    value: MenuItemType.beverage,
+                    child: Text('Bebida'),
+                  ),
+                  DropdownMenuItem(
+                    value: MenuItemType.dessert,
+                    child: Text('Postre'),
+                  ),
+                  DropdownMenuItem(
+                    value: MenuItemType.main_course,
+                    child: Text('Plato de segundo'),
+                  ),
+                  DropdownMenuItem(
+                    value: MenuItemType.executive_dish,
+                    child: Text('Plato a la carta'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) setState(() => _selectedType = value);
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
                   Expanded(
                     child: TextField(
-                      controller: _priceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      controller: _unitController,
+                      keyboardType: TextInputType.number,
                       style: const TextStyle(
                         color: AppColors.textDark,
                         fontSize: 16,
                       ),
+                      inputFormatters: [LengthLimitingTextInputFormatter(10)],
                       decoration: InputDecoration(
-                        labelText: 's/',
+                        labelText: 'Stock',
                         filled: true,
                         fillColor: AppColors.white,
                         border: _inputBorder,
@@ -431,18 +412,40 @@ class _EditDishModalState extends State<EditDishModal> {
                       ),
                     ),
                   ),
+                  if (_typeRequiresPrice(_selectedType)) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _priceController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        style: const TextStyle(
+                          color: AppColors.textDark,
+                          fontSize: 16,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: 's/',
+                          filled: true,
+                          fillColor: AppColors.white,
+                          border: _inputBorder,
+                          enabledBorder: _inputBorder,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 48,
-              child: FilledButton(
-                onPressed: _canSubmitEdit ? _submit : null,
-                child: const Text('Actualizar'),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 48,
+                child: FilledButton(
+                  onPressed: _canSubmitEdit ? _submit : null,
+                  child: const Text('Actualizar'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

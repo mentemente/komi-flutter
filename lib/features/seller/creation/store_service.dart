@@ -1,9 +1,19 @@
 import 'package:komi_fe/core/network/http_client.dart';
+import 'package:komi_fe/features/seller/configuration/seller_store_model.dart';
 
 class StoreService {
   StoreService(this._client);
 
   final HttpClient _client;
+
+  /// GET `/v1/store/:id` — store detail (seller authenticated).
+  Future<SellerStore> getStoreById(String storeId) {
+    final id = storeId.trim();
+    return _client.get<SellerStore>(
+      '/v1/store/${Uri.encodeComponent(id)}',
+      fromJson: SellerStore.fromJson,
+    );
+  }
 
   Future<Map<String, dynamic>> createStore({
     required String name,
@@ -24,10 +34,7 @@ class StoreService {
         'name': name,
         'description': description,
         'paymentQr': paymentQr,
-        'location': {
-          'latitude': latitude,
-          'longitude': longitude,
-        },
+        'location': {'latitude': latitude, 'longitude': longitude},
         'schedules': schedules,
         'pickupEnabled': pickupEnabled,
         'deliveryEnabled': deliveryEnabled,
