@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:komi_fe/core/constants/app_colors.dart';
 import 'package:komi_fe/core/theme/app_text_styles.dart';
+import 'package:komi_fe/core/widgets/menu_type_color_legend.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_item.dart';
 import 'package:komi_fe/features/seller/dishes/widgets/daily_dish_card.dart';
 
@@ -14,6 +15,7 @@ class DailyDishesBody extends StatelessWidget {
     this.onRetryCatalog,
     this.onEditItem,
     this.onDeleteItem,
+    this.onBulkEditCatalog,
   });
 
   final List<DailyMenuItem> catalogFoods;
@@ -24,6 +26,7 @@ class DailyDishesBody extends StatelessWidget {
   final List<DailyMenuItem> dailyDishes;
   final void Function(int index, DailyMenuItem item)? onEditItem;
   final void Function(int index)? onDeleteItem;
+  final VoidCallback? onBulkEditCatalog;
 
   @override
   Widget build(BuildContext context) {
@@ -65,16 +68,33 @@ class DailyDishesBody extends StatelessWidget {
             const SizedBox(height: 12),
           ],
           if (catalogFoods.isNotEmpty) ...[
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Platos publicados',
-                style: AppTextStyles.subtitle2.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Platos publicados',
+                    style: AppTextStyles.subtitle2.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                    ),
+                  ),
                 ),
-              ),
+                if (onBulkEditCatalog != null)
+                  IconButton(
+                    onPressed: onBulkEditCatalog,
+                    icon: const Icon(Icons.edit_outlined, size: 20),
+                    color: AppColors.primary,
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.accentLight,
+                      padding: const EdgeInsets.all(8),
+                      minimumSize: const Size(32, 32),
+                    ),
+                    tooltip: 'Editar todos',
+                  ),
+              ],
             ),
+            const SizedBox(height: 8),
+            const MenuTypeColorLegend(),
             const SizedBox(height: 12),
             ...catalogFoods.map((d) => DailyDishCard(item: d, readOnly: true)),
             const SizedBox(height: 20),

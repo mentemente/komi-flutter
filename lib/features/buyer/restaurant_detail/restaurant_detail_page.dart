@@ -91,13 +91,14 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
   }
 
   void _addMenuCartItem(DishItem mainCourse, MenuDishes dishes) {
+    if (!mainCourse.isActive) return;
     DishItem? appetizer;
     DishItem? beverage;
     DishItem? dessert;
 
     if (_selectedAppetizerId != null) {
       for (final a in dishes.appetizer) {
-        if (a.id == _selectedAppetizerId) {
+        if (a.id == _selectedAppetizerId && a.isActive) {
           appetizer = a;
           break;
         }
@@ -105,7 +106,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
     }
     if (_selectedBeverageId != null) {
       for (final b in dishes.beverage) {
-        if (b.id == _selectedBeverageId) {
+        if (b.id == _selectedBeverageId && b.isActive) {
           beverage = b;
           break;
         }
@@ -113,7 +114,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
     }
     if (_selectedDessertId != null) {
       for (final d in dishes.dessert) {
-        if (d.id == _selectedDessertId) {
+        if (d.id == _selectedDessertId && d.isActive) {
           dessert = d;
           break;
         }
@@ -150,6 +151,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
   }
 
   void _addExecDish(DishItem dish) {
+    if (!dish.isActive) return;
     setState(() => _execCounts[dish.id] = (_execCounts[dish.id] ?? 0) + 1);
   }
 
@@ -304,6 +306,7 @@ class _RestaurantDetailPageState extends ConsumerState<RestaurantDetailPage> {
         ),
       );
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

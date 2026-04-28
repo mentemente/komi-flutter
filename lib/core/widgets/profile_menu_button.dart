@@ -104,12 +104,8 @@ class _ProfileMenuButtonState extends ConsumerState<ProfileMenuButton> {
                               label: 'Config. Tienda',
                               onTap: () {
                                 Navigator.of(dialogContext).pop();
-                                ScaffoldMessenger.of(ctx).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Próximamente: configuración de tienda',
-                                    ),
-                                  ),
+                                ctx.go(
+                                  '${RouteNames.seller}${RouteNames.storeConfiguration}',
                                 );
                               },
                             ),

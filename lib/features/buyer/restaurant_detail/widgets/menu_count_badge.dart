@@ -7,35 +7,39 @@ class MenuCountBadge extends StatelessWidget {
   const MenuCountBadge({
     super.key,
     required this.count,
-    required this.onTap,
+    this.onTap,
   });
 
   final int count;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final hasCount = count > 0;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: hasCount ? kMenuCountGreen : Colors.transparent,
-          shape: BoxShape.circle,
-          border: hasCount
-              ? null
-              : Border.all(color: AppColors.textDark, width: 1.5),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          hasCount ? '$count' : '+',
-          style: TextStyle(
-            fontSize: hasCount ? 14 : 18,
-            fontWeight: FontWeight.w700,
-            color: hasCount ? AppColors.white : AppColors.textDark,
-            height: 1.0,
+    final disabled = onTap == null;
+    return Opacity(
+      opacity: disabled ? 0.45 : 1,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: hasCount ? kMenuCountGreen : Colors.transparent,
+            shape: BoxShape.circle,
+            border: hasCount
+                ? null
+                : Border.all(color: AppColors.textDark, width: 1.5),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            hasCount ? '$count' : '+',
+            style: TextStyle(
+              fontSize: hasCount ? 14 : 18,
+              fontWeight: FontWeight.w700,
+              color: hasCount ? AppColors.white : AppColors.textDark,
+              height: 1.0,
+            ),
           ),
         ),
       ),
@@ -48,35 +52,39 @@ class MenuSmallRoundButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.filled,
-    required this.onTap,
+    this.onTap,
   });
 
   final String label;
   final bool filled;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: filled ? kMenuCountGreen : Colors.transparent,
-          shape: BoxShape.circle,
-          border: filled
-              ? null
-              : Border.all(color: AppColors.textDark, width: 1.5),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: filled ? AppColors.white : AppColors.textDark,
-            height: 1.0,
+    final disabled = onTap == null;
+    return Opacity(
+      opacity: disabled ? 0.45 : 1,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: filled ? kMenuCountGreen : Colors.transparent,
+            shape: BoxShape.circle,
+            border: filled
+                ? null
+                : Border.all(color: AppColors.textDark, width: 1.5),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: filled ? AppColors.white : AppColors.textDark,
+              height: 1.0,
+            ),
           ),
         ),
       ),

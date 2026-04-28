@@ -14,12 +14,15 @@ class PaymentMethodSection extends StatelessWidget {
     required this.selectedMethods,
     required this.onMethodToggled,
     this.onPaymentQrUrlChanged,
+    this.initialPaymentQrUrl,
     this.qrRequiredMessage,
   });
 
   final Set<PaymentMethod> selectedMethods;
   final void Function(PaymentMethod method) onMethodToggled;
   final ValueChanged<String?>? onPaymentQrUrlChanged;
+  /// Si viene del GET `/v1/store/:id` (`paymentQr`), se muestra en el recuadro.
+  final String? initialPaymentQrUrl;
   final String? qrRequiredMessage;
 
   @override
@@ -47,6 +50,7 @@ class PaymentMethodSection extends StatelessWidget {
           const SizedBox(height: 16),
           _PaymentQrUploader(
             onUrlChanged: onPaymentQrUrlChanged,
+            initialPaymentQrUrl: initialPaymentQrUrl,
           ),
           if (qrRequiredMessage != null) ...[
             const SizedBox(height: 8),
@@ -81,9 +85,13 @@ String? _imageUrlFromUploadData(Map<String, dynamic> data) {
 }
 
 class _PaymentQrUploader extends StatefulWidget {
-  const _PaymentQrUploader({this.onUrlChanged});
+  const _PaymentQrUploader({
+    this.onUrlChanged,
+    this.initialPaymentQrUrl,
+  });
 
   final ValueChanged<String?>? onUrlChanged;
+  final String? initialPaymentQrUrl;
 
   @override
   State<_PaymentQrUploader> createState() => _PaymentQrUploaderState();
@@ -94,6 +102,15 @@ class _PaymentQrUploaderState extends State<_PaymentQrUploader> {
   Uint8List? _previewBytes;
   String? _remoteUrl;
   bool _uploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final u = widget.initialPaymentQrUrl?.trim();
+    if (u != null && u.isNotEmpty) {
+      _remoteUrl = u;
+    }
+  }
 
   Future<void> _pickAndUpload() async {
     final xfile = await _picker.pickImage(

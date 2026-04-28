@@ -44,9 +44,9 @@ class _MenuItemCardState extends State<MenuItemCard> {
       await widget.onActiveChanged(value);
     } on ApiException catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.displayMessage)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.displayMessage)));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -171,49 +171,54 @@ class _EditMenuItemModalState extends State<_EditMenuItemModal> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.textGray.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              widget.item.name,
-              style: AppTextStyles.subtitle1.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark,
-              ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.textGray.withValues(alpha: 0.3),
             ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _stockController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: AppColors.textDark, fontSize: 16),
-              decoration: InputDecoration(
-                labelText: 'Stock',
-                prefixIcon: const Icon(Icons.inventory_2_outlined),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: AppColors.textGray.withValues(alpha: 0.6),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                widget.item.name,
+                style: AppTextStyles.subtitle1.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _stockController,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: AppColors.textDark, fontSize: 16),
+                decoration: InputDecoration(
+                  labelText: 'Stock',
+                  prefixIcon: const Icon(Icons.inventory_2_outlined),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: AppColors.textGray.withValues(alpha: 0.6),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              height: 48,
-              child: FilledButton(
-                onPressed: _submit,
-                child: const Text('Actualizar'),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 48,
+                child: FilledButton(
+                  onPressed: _submit,
+                  child: const Text('Actualizar'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
