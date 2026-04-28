@@ -105,7 +105,7 @@ class _ProfileMenuButtonState extends ConsumerState<ProfileMenuButton> {
                               onTap: () {
                                 Navigator.of(dialogContext).pop();
                                 ctx.go(
-                                  '${RouteNames.seller}/${RouteNames.storeConfiguration}',
+                                  '${RouteNames.seller}${RouteNames.storeConfiguration}',
                                 );
                               },
                             ),

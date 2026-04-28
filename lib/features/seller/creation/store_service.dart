@@ -1,5 +1,5 @@
 import 'package:komi_fe/core/network/http_client.dart';
-import 'package:komi_fe/features/seller/configuration/seller_store_model.dart';
+import 'package:komi_fe/features/seller/configuration/models/seller_store_model.dart';
 
 class StoreService {
   StoreService(this._client);
@@ -41,6 +41,42 @@ class StoreService {
         'deliveryCost': deliveryCost,
         'payments': payments,
       },
+    );
+  }
+
+  /// PATCH `/v1/store/:id` — update store configuration (seller authenticated).
+  Future<SellerStore> patchStore({
+    required String storeId,
+    required List<Map<String, dynamic>> schedules,
+    required bool pickupEnabled,
+    required bool deliveryEnabled,
+    required double deliveryCost,
+    required bool cashOnDelivery,
+    required bool prepaid,
+    required double latitude,
+    required double longitude,
+    String? paymentQr,
+  }) {
+    final id = storeId.trim();
+    final body = <String, dynamic>{
+      'schedules': schedules,
+      'payments': {'cashOnDelivery': cashOnDelivery, 'prepaid': prepaid},
+      'deliveryCost': deliveryCost,
+      'pickupEnabled': pickupEnabled,
+      'deliveryEnabled': deliveryEnabled,
+      'location': {
+        'type': 'Point',
+        'coordinates': {'lat': latitude, 'lng': longitude},
+      },
+    };
+    final qr = paymentQr?.trim();
+    if (qr != null && qr.isNotEmpty) {
+      body['paymentQr'] = qr;
+    }
+    return _client.patch<SellerStore>(
+      '/v1/store/${Uri.encodeComponent(id)}',
+      fromJson: SellerStore.fromJson,
+      body: body,
     );
   }
 }

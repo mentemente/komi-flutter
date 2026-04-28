@@ -71,6 +71,7 @@ class SellerStore {
     required this.name,
     required this.description,
     this.imageUrl,
+    this.paymentQr,
     required this.schedules,
     required this.ownerId,
     required this.pickupEnabled,
@@ -86,6 +87,9 @@ class SellerStore {
   final String name;
   final String description;
   final String? imageUrl;
+
+  /// URL del código QR de Yape/Plin (GET `/v1/store/:id`).
+  final String? paymentQr;
   final List<StoreSchedule> schedules;
   final String ownerId;
   final bool pickupEnabled;
@@ -129,6 +133,7 @@ class SellerStore {
       name: json['name'] as String? ?? '',
       description: json['description'] as String? ?? '',
       imageUrl: json['imageUrl'] as String?,
+      paymentQr: json['paymentQr'] as String?,
       schedules: parsed,
       ownerId: json['ownerId'] as String? ?? '',
       pickupEnabled: json['pickupEnabled'] as bool? ?? false,
