@@ -51,16 +51,18 @@ class SelectableMenuDishRow extends StatelessWidget {
     required this.item,
     required this.isSelected,
     required this.onTap,
+    this.enabled = true,
   });
 
   final DishItem item;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       borderRadius: BorderRadius.circular(6),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 3),
@@ -68,7 +70,7 @@ class SelectableMenuDishRow extends StatelessWidget {
           children: [
             Checkbox(
               value: isSelected,
-              onChanged: (_) => onTap(),
+              onChanged: enabled ? (_) => onTap() : null,
               activeColor: AppColors.textDark,
               checkColor: AppColors.white,
               side: BorderSide(
@@ -79,7 +81,17 @@ class SelectableMenuDishRow extends StatelessWidget {
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             const SizedBox(width: 8),
-            Expanded(child: Text(item.name, style: AppTextStyles.bodySmall)),
+            Expanded(
+              child: Text(
+                item.name,
+                style: AppTextStyles.bodySmall.copyWith(
+                  decoration: enabled ? null : TextDecoration.lineThrough,
+                  color: enabled
+                      ? null
+                      : AppColors.textGray.withValues(alpha: 0.7),
+                ),
+              ),
+            ),
           ],
         ),
       ),

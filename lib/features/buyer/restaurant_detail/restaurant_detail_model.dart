@@ -50,6 +50,8 @@ class StoreMenuInfo {
     required this.deliveryEnabled,
     required this.deliveryCost,
     required this.paymentQr,
+    required this.prepaid,
+    required this.cashOnDelivery,
   });
 
   final String name;
@@ -60,17 +62,38 @@ class StoreMenuInfo {
   final double deliveryCost;
   final String paymentQr;
 
-  factory StoreMenuInfo.fromJson(Map<String, dynamic> json) => StoreMenuInfo(
-    name: json['name'] as String? ?? '',
-    isOpenNow: json['isOpenNow'] as bool? ?? false,
-    schedule: StoreMenuSchedule.fromJson(
-      json['schedule'] as Map<String, dynamic>? ?? {},
-    ),
-    pickupEnabled: json['pickupEnabled'] as bool? ?? false,
-    deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
-    deliveryCost: (json['deliveryCost'] as num?)?.toDouble() ?? 0.0,
-    paymentQr: json['paymentQr'] as String? ?? '',
-  );
+  /// Yape/Plin (prepaid), per `store.payments.prepaid` in the API.
+  final bool prepaid;
+
+  /// Cash on delivery, per `store.payments.cashOnDelivery`.
+  final bool cashOnDelivery;
+
+  factory StoreMenuInfo.fromJson(Map<String, dynamic> json) {
+    final pay = json['payments'] is Map<String, dynamic>
+        ? json['payments'] as Map<String, dynamic>
+        : <String, dynamic>{};
+    final legacyNoPayments = !json.containsKey('payments');
+    final prepaid = legacyNoPayments
+        ? true
+        : (pay['prepaid'] as bool? ?? false);
+    final cashOnDelivery = legacyNoPayments
+        ? true
+        : (pay['cashOnDelivery'] as bool? ?? false);
+
+    return StoreMenuInfo(
+      name: json['name'] as String? ?? '',
+      isOpenNow: json['isOpenNow'] as bool? ?? false,
+      schedule: StoreMenuSchedule.fromJson(
+        json['schedule'] as Map<String, dynamic>? ?? {},
+      ),
+      pickupEnabled: json['pickupEnabled'] as bool? ?? false,
+      deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
+      deliveryCost: (json['deliveryCost'] as num?)?.toDouble() ?? 0.0,
+      paymentQr: json['paymentQr'] as String? ?? '',
+      prepaid: prepaid,
+      cashOnDelivery: cashOnDelivery,
+    );
+  }
 }
 
 class MenuDishes {
@@ -92,20 +115,23 @@ class MenuDishes {
   bool get hasALaCarteItems => executiveDish.isNotEmpty;
 
   factory MenuDishes.fromJson(Map<String, dynamic> json) {
-    List<DishItem> parseDishes(String key) {
+    List<DishItem> parseDishes(String key, {bool activeOnly = true}) {
       final raw = json[key] as List<dynamic>? ?? [];
-      return raw
+      final list = raw
           .map((e) => DishItem.fromJson(e as Map<String, dynamic>))
-          .where((d) => d.isActive)
           .toList();
+      if (activeOnly) {
+        return list.where((d) => d.isActive).toList();
+      }
+      return list;
     }
 
     return MenuDishes(
-      appetizer: parseDishes('appetizer'),
-      mainCourse: parseDishes('main_course'),
-      executiveDish: parseDishes('executive_dish'),
-      beverage: parseDishes('beverage'),
-      dessert: parseDishes('dessert'),
+      appetizer: parseDishes('appetizer', activeOnly: false),
+      mainCourse: parseDishes('main_course', activeOnly: false),
+      executiveDish: parseDishes('executive_dish', activeOnly: false),
+      beverage: parseDishes('beverage', activeOnly: false),
+      dessert: parseDishes('dessert', activeOnly: false),
     );
   }
 }

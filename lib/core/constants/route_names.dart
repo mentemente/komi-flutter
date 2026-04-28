@@ -24,4 +24,5 @@ abstract final class RouteNames {
   static const String dailyMenu = '/carta-del-dia';
   static const String overview = '/resumen';
   static const String dishes = '/mis-platos';
+  static const String storeConfiguration = '/configuracion';
 }

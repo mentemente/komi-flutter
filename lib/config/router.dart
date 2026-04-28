@@ -17,6 +17,7 @@ import 'package:komi_fe/features/seller/overview/overview_page.dart';
 import 'package:komi_fe/core/widgets/mobile_viewport_container.dart';
 import 'package:komi_fe/features/seller/creation/creation_page.dart';
 import 'package:komi_fe/features/seller/daily_menu/daily_menu_page.dart';
+import 'package:komi_fe/features/seller/configuration/store_configuration/store_configuration_page.dart';
 import 'package:komi_fe/features/buyer/restaurants/restaurants_page.dart';
 import 'package:komi_fe/features/buyer/location/location_permission_page.dart';
 import 'package:komi_fe/features/buyer/customer_orders/customer_orders_page.dart';
@@ -173,6 +174,13 @@ GoRouter createGoRouter(ProviderContainer container) {
                 path: RouteNames.dishes,
                 pageBuilder: (context, state) =>
                     _page(key: state.pageKey, child: const DishesPage()),
+              ),
+              GoRoute(
+                path: RouteNames.storeConfiguration,
+                pageBuilder: (context, state) => _page(
+                  key: state.pageKey,
+                  child: const StoreConfigurationPage(),
+                ),
               ),
             ],
           ),
